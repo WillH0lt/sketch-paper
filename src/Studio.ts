@@ -25,9 +25,9 @@ registerIconLibrary("fa", {
 
 type Events = {
   // "select-image": [void];
-  // "add-page": [Page];
-  // "update-page": [Page];
-  // "remove-page": [Page];
+  // "add-tile": [Tile];
+  // "update-tile": [Tile];
+  // "remove-tile": [Tile];
 };
 
 type StudioEmitter = Emitter<Events>;
@@ -60,6 +60,8 @@ export class Studio extends (Emitter as { new (): StudioEmitter }) {
     zoomContainer.style.right = "0";
     zoomContainer.style.zIndex = "20";
     zoomContainer.style.pointerEvents = "none";
+    zoomContainer.setAttribute("minZoom", settings.minZoom.toString());
+    zoomContainer.setAttribute("maxZoom", settings.maxZoom.toString());
     container.appendChild(zoomContainer);
     this.zoomContainer = zoomContainer;
 
@@ -117,8 +119,8 @@ export class Studio extends (Emitter as { new (): StudioEmitter }) {
       .wheel()
       .decelerate()
       .clampZoom({
-        minScale: 0.1,
-        maxScale: 10,
+        minScale: settings.minZoom,
+        maxScale: settings.maxZoom,
       });
     // .clamp({
     //   direction: "all",
@@ -147,7 +149,7 @@ export class Studio extends (Emitter as { new (): StudioEmitter }) {
       resources
     );
     const renderGroup = System.group(
-      sys.SketchPageHandler,
+      sys.SketchTileHandler,
       resources,
       sys.SketchShapeHandler,
       resources,
@@ -159,7 +161,7 @@ export class Studio extends (Emitter as { new (): StudioEmitter }) {
       resources
     );
     const cleanupGroup = System.group(sys.Deleter);
-    const networkGroup = System.group(sys.Snapshot);
+    const networkGroup = System.group(sys.UndoRedo);
 
     inputsGroup.schedule((s) => s.before(renderGroup));
     renderGroup.schedule((s) => s.before(cleanupGroup));
@@ -194,7 +196,7 @@ export class Studio extends (Emitter as { new (): StudioEmitter }) {
       );
       this.zoomContainer?.setAttribute("zoom", zoom.toString());
 
-      // worldSys.createEntity(comps.Page);
+      // worldSys.createEntity(comps.Tile);
     });
 
     // =================================

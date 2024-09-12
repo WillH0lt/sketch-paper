@@ -2,7 +2,7 @@ import * as PIXI from "pixi.js";
 
 import { PaintShader } from "./PaintShader";
 import { BaseBrush } from "../BaseBrush";
-import type { PixiPage } from "../../PixiPage";
+import type { PixiTile } from "../../PixiTile";
 import { BrushKind } from "../../enums";
 
 export class PaintBrush extends BaseBrush {
@@ -69,7 +69,7 @@ export class PaintBrush extends BaseBrush {
     this.brush.shader.brushColor = value;
   }
 
-  draw(pointA: [number, number], pointB: [number, number], page: PixiPage) {
+  draw(pointA: [number, number], pointB: [number, number], tile: PixiTile) {
     const distance = Math.sqrt(
       Math.pow(pointB[0] - pointA[0], 2) + Math.pow(pointB[1] - pointA[1], 2)
     );
@@ -86,15 +86,15 @@ export class PaintBrush extends BaseBrush {
     for (let i = 0; i < points.length; i++) {
       const renderTexture = this.brush.shader.texture;
       const start = points[i];
-      const x = start[0] - page.position.x - renderTexture.width / 2;
-      const y = start[1] - page.position.y - renderTexture.width / 2;
+      const x = start[0] - tile.position.x - renderTexture.width / 2;
+      const y = start[1] - tile.position.y - renderTexture.width / 2;
 
       this.brush.position.x = x;
       this.brush.position.y = y;
       this.brush.shader.position = [x, y];
       this.app.renderer.render({
         container: this.brush,
-        target: page.texture,
+        target: tile.texture,
         clear: false,
       });
     }

@@ -1,6 +1,7 @@
 export { Brush } from "./Brush";
 export { Input } from "./Input";
-export { Page } from "./Page";
+export { Tile } from "./Tile";
+export { TileSource } from "./TileSource";
 export { Redoable } from "./Redoable";
 export { Settings } from "./Settings";
 export { Shape } from "./Shape";

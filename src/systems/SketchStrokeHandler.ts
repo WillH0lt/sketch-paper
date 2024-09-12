@@ -6,7 +6,7 @@ import * as comps from "../components";
 import * as sys from "../systems";
 import { hexToRgba } from "../colorUtils";
 import { BrushKind } from "../enums";
-import { PixiPage } from "../PixiPage";
+import { PixiTile } from "../PixiTile";
 import { SketchBase } from "./SketchBase";
 
 import { CrayonBrush } from "../brushes/crayon";
@@ -70,10 +70,10 @@ export class SketchStrokeHandler extends SketchBase {
       stroke.prevPoint = this.input.pointerWorld;
 
       for (const sprite of sprites) {
-        const pageEntity = this.getPageEntity(sprite);
-        if (pageEntity) {
-          const page = pageEntity.write(comps.Page);
-          page.strokeEntity = strokeEntity;
+        const tileEntity = this.getTileEntity(sprite);
+        if (tileEntity) {
+          const tile = tileEntity.write(comps.Tile);
+          tile.strokeEntity = strokeEntity;
         }
       }
     }
@@ -82,7 +82,7 @@ export class SketchStrokeHandler extends SketchBase {
     if (this.input.pointerUpTrigger) {
       for (const strokeEntity of this.strokes.current) {
         const stroke = strokeEntity.read(comps.Stroke);
-        this.snapshotPages(stroke.pages);
+        this.snapshotTiles(stroke.tiles);
         this.deleteEntity(strokeEntity);
       }
     }
@@ -91,21 +91,21 @@ export class SketchStrokeHandler extends SketchBase {
   renderStroke(
     prevPoint: [number, number],
     currentPoint: [number, number]
-  ): PixiPage[] {
+  ): PixiTile[] {
     if (!this.brushInstance) return [];
 
-    const intersectedA = this.getIntersectedPages(prevPoint);
-    let intersectedB = this.getIntersectedPages(currentPoint);
+    const intersectedA = this.getIntersectedTiles(prevPoint);
+    let intersectedB = this.getIntersectedTiles(currentPoint);
 
     // get union of A and B
     const intersected = intersectedA
       .concat(intersectedB)
-      .filter((page, index, self) => {
-        return index === self.findIndex((t) => t === page);
+      .filter((tile, index, self) => {
+        return index === self.findIndex((t) => t === tile);
       });
 
-    for (const page of intersected) {
-      this.brushInstance.draw(prevPoint, currentPoint, page);
+    for (const tile of intersected) {
+      this.brushInstance.draw(prevPoint, currentPoint, tile);
     }
 
     return intersected;

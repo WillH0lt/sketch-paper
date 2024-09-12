@@ -6,7 +6,7 @@ import * as comps from "../components";
 import * as sys from "../systems";
 import { SketchBase } from "./SketchBase";
 import { BrushKind } from "../enums";
-import { PixiPage } from "../PixiPage";
+import { PixiTile } from "../PixiTile";
 
 @system((s) =>
   s.inAnyOrderWith(sys.SketchStrokeHandler, sys.SketchFloodFillHandler)
@@ -20,9 +20,9 @@ export class SketchShapeHandler extends SketchBase {
     (q) => q.current.with(comps.Shape).write
   );
 
-  private readonly pages = this.query(
+  private readonly tiles = this.query(
     (q) =>
-      q.added.and.current.and.removed.and.addedOrChanged.with(comps.Page).write
+      q.added.and.current.and.removed.and.addedOrChanged.with(comps.Tile).write
         .trackWrites
   );
 
@@ -123,47 +123,46 @@ export class SketchShapeHandler extends SketchBase {
     }
 
     if (this.shapeGraphics.parent === null) {
-      console.log(this.shapeGraphics);
       this.viewport.addChild(this.shapeGraphics);
     }
   }
 
   renderShape() {
     const aabb = this.shapeGraphics.getBounds().rectangle;
-    const pages = this.intersectAabb(aabb);
+    const tiles = this.intersectAabb(aabb);
 
-    for (const page of pages) {
+    for (const tile of tiles) {
       const localShapeGraphics = this.shapeGraphics.clone();
-      localShapeGraphics.position.x -= page.position.x;
-      localShapeGraphics.position.y -= page.position.y;
+      localShapeGraphics.position.x -= tile.position.x;
+      localShapeGraphics.position.y -= tile.position.y;
       this.app.renderer.render({
         container: localShapeGraphics,
-        target: page.texture,
+        target: tile.texture,
         clear: false,
       });
     }
 
-    const pageEntities = pages
-      .map((page) => this.getPageEntity(page))
-      .filter((pageEntity) => pageEntity !== null) as Entity[];
-    this.snapshotPages(pageEntities);
+    const tileEntities = tiles
+      .map((tile) => this.getTileEntity(tile))
+      .filter((tileEntity) => tileEntity !== null) as Entity[];
+    this.snapshotTiles(tileEntities);
   }
 
-  intersectAabb(aabb: PIXI.Rectangle): PixiPage[] {
-    const intersected: PixiPage[] = [];
-    for (const pageEntity of this.pages.current) {
-      const page = pageEntity.read(comps.Page);
+  intersectAabb(aabb: PIXI.Rectangle): PixiTile[] {
+    const intersected: PixiTile[] = [];
+    for (const tileEntity of this.tiles.current) {
+      const tile = tileEntity.read(comps.Tile);
 
-      const pageAabb = new PIXI.Rectangle(
-        page.position[0],
-        page.position[1],
+      const tileAabb = new PIXI.Rectangle(
+        tile.position[0],
+        tile.position[1],
         this.settings.tileWidth,
         this.settings.tileHeight
       );
 
-      if (aabb.intersects(pageAabb)) {
-        const page = this.getPixiPage(pageEntity);
-        if (page) intersected.push(page);
+      if (aabb.intersects(tileAabb)) {
+        const tile = this.getPixiTile(tileEntity);
+        if (tile) intersected.push(tile);
       }
     }
 

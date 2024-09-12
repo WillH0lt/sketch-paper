@@ -7,7 +7,7 @@ import { BaseSystem } from "./Base";
 const jsonDiffPatchInstance = jsondiffpatch.create();
 
 @system
-export class Snapshot extends BaseSystem {
+export class UndoRedo extends BaseSystem {
   private readonly input = this.singleton.read(comps.Input);
 
   private readonly snapshots = this.query((q) =>
@@ -28,7 +28,9 @@ export class Snapshot extends BaseSystem {
       .write.orderBy((s) => s.ordinal)
   );
 
-  private readonly pages = this.query((q) => q.current.with(comps.Page));
+  private readonly tileSources = this.query((q) =>
+    q.current.with(comps.TileSource)
+  );
 
   private readonly all = this.query((q) => q.usingAll.write);
 
@@ -76,17 +78,23 @@ export class Snapshot extends BaseSystem {
   private applyDiff(diff: any): Entity[] {
     const createdEntities: Entity[] = [];
     for (const label in diff) {
-      const pageEntity = this.pages.current.find(
-        (i) => i.read(comps.Page).label === label
+      const tileSourceEntity = this.tileSources.current.find(
+        (i) => i.read(comps.TileSource).label === label
       );
 
-      if (!pageEntity) continue;
+      if (!tileSourceEntity || !Array.isArray(diff[label])) continue;
 
-      if (Array.isArray(diff[label]) && diff[label].length === 2) {
-        // only apply diff if page has changed (i.e. don't apply when page is added or removed)
-
-        const page = pageEntity.write(comps.Page);
-        page.image = diff[label][1];
+      if (diff[label].length === 2) {
+        // only apply diff if tile has changed (i.e. don't apply when tile is added or removed)
+        const tileSource = tileSourceEntity.write(comps.TileSource);
+        tileSource.image = diff[label][1];
+      } else if (diff[label].length === 3) {
+        // a value was deleted, i.e. it had a value and is now undefined
+        const image = diff[label][0];
+        if (image !== "") {
+          const tileSource = tileSourceEntity.write(comps.TileSource);
+          tileSource.image = "";
+        }
       }
     }
 
@@ -99,31 +107,31 @@ export class Snapshot extends BaseSystem {
     //   updated: new Array<any>(),
     //   removed: new Array<any>(),
     // };
-    // for (const pageId in diff) {
-    //   if (Array.isArray(diff[pageId]) && diff[pageId].length === 1) {
+    // for (const tileId in diff) {
+    //   if (Array.isArray(diff[tileId]) && diff[tileId].length === 1) {
     //     // a new value was added, i.e. it was undefined and now has a value
-    //     const page = state[pageId].element;
-    //     changes.added.push(page);
-    //   } else if (Array.isArray(diff[pageId]) && diff[pageId].length === 3) {
+    //     const tile = state[tileId].element;
+    //     changes.added.push(tile);
+    //   } else if (Array.isArray(diff[tileId]) && diff[tileId].length === 3) {
     //     // a value was deleted, i.e. it had a value and is now undefined
-    //     // emitter.emit("snapshot:remove-elements", { id: pageId });
-    //     const page = diff[pageId][0].element;
-    //     changes.removed.push(page);
+    //     // emitter.emit("snapshot:remove-elements", { id: tileId });
+    //     const tile = diff[tileId][0].element;
+    //     changes.removed.push(tile);
     //   } else {
-    //     if (!diff[pageId].element) continue;
-    //     const page = state[pageId].element;
-    //     changes.updated.push(page);
+    //     if (!diff[tileId].element) continue;
+    //     const tile = state[tileId].element;
+    //     changes.updated.push(tile);
     //   }
     // }
     // emitter.emit("snapshot:apply-changes", changes);
   }
 
   private serializeState(
-    pageEntities = this.pages.current
+    tileSourceEntities = this.tileSources.current
   ): Record<string, any> {
     const state: Record<string, any> = {};
-    for (const pageEntity of pageEntities) {
-      const { label, image } = pageEntity.read(comps.Page);
+    for (const tileSourceEntity of tileSourceEntities) {
+      const { label, image } = tileSourceEntity.read(comps.TileSource);
       state[label] = image;
     }
 
@@ -175,6 +183,7 @@ export class Snapshot extends BaseSystem {
     const diff = jsonDiffPatchInstance.diff(currState, nextState);
 
     this.applyDiff(diff);
+
     // this.emitChange(diff, nextState);
   }
 }

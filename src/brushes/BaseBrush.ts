@@ -1,4 +1,4 @@
-import type { PixiPage } from "../PixiPage";
+import type { PixiTile } from "../PixiTile";
 import { BrushKind } from "../enums";
 
 export abstract class BaseBrush {
@@ -8,6 +8,6 @@ export abstract class BaseBrush {
   abstract draw(
     pointA: [number, number],
     pointB: [number, number],
-    page: PixiPage
+    tile: PixiTile
   ): void;
 }

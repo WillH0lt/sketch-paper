@@ -2,7 +2,7 @@ import * as PIXI from "pixi.js";
 
 import { DefaultShader } from "./shaders/default";
 
-export class PixiPage extends PIXI.Container {
+export class PixiTile extends PIXI.Container {
   texture: PIXI.Texture;
   mesh: PIXI.Mesh<PIXI.Geometry, PIXI.Shader>;
 

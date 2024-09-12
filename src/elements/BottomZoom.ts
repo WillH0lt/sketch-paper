@@ -57,7 +57,10 @@ export class BottomZoom extends LitElement {
   @property({ type: Number })
   zoom = 1;
 
+  @property({ type: Number })
   minZoom = 0.1;
+
+  @property({ type: Number })
   maxZoom = 10;
 
   attributeChangedCallback(name: string, oldVal: string, newVal: string) {

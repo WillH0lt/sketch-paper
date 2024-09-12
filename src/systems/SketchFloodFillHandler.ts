@@ -26,7 +26,7 @@ export class SketchFloodFillHandler extends SketchBase {
 
   renderFloodFill() {
     const point = this.input.pointerWorld;
-    const intersected = this.getIntersectedPages(point);
+    const intersected = this.getIntersectedTiles(point);
     if (!intersected.length) return;
 
     for (const intersect of intersected) {
@@ -67,9 +67,9 @@ export class SketchFloodFillHandler extends SketchBase {
         clear: false,
       });
 
-      const pageEntity = this.getPageEntity(intersect);
-      if (!pageEntity) return;
-      this.snapshotPages([pageEntity]);
+      const tileEntity = this.getTileEntity(intersect);
+      if (!tileEntity) return;
+      this.snapshotTiles([tileEntity]);
     }
   }
 }

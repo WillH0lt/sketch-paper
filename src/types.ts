@@ -7,6 +7,8 @@ export interface Brush {
 }
 
 export interface Settings {
+  minZoom: number;
+  maxZoom: number;
   tileCountX: number;
   tileCountY: number;
   tileWidth: number;

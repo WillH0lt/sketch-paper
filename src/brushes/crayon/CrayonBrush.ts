@@ -2,7 +2,7 @@ import * as PIXI from "pixi.js";
 
 import { BaseBrush } from "../BaseBrush";
 import { CrayonShader } from "./CrayonShader";
-import type { PixiPage } from "../../PixiPage";
+import type { PixiTile } from "../../PixiTile";
 import { BrushKind } from "../../enums";
 
 export class CrayonBrush extends BaseBrush {
@@ -72,7 +72,7 @@ export class CrayonBrush extends BaseBrush {
     this.lastPosition = null;
   }
 
-  draw(pointA: [number, number], pointB: [number, number], page: PixiPage) {
+  draw(pointA: [number, number], pointB: [number, number], tile: PixiTile) {
     const distance = Math.sqrt(
       Math.pow(pointB[0] - pointA[0], 2) + Math.pow(pointB[1] - pointA[1], 2)
     );
@@ -95,8 +95,8 @@ export class CrayonBrush extends BaseBrush {
     for (let i = 0; i < points.length; i++) {
       const renderTexture = this.brush.shader.texture;
       const point = points[i];
-      const x = point[0] - page.position.x - renderTexture.width / 2;
-      const y = point[1] - page.position.y - renderTexture.width / 2;
+      const x = point[0] - tile.position.x - renderTexture.width / 2;
+      const y = point[1] - tile.position.y - renderTexture.width / 2;
 
       if (!this.lastPosition) {
         this.lastPosition = [x, y];
@@ -109,7 +109,7 @@ export class CrayonBrush extends BaseBrush {
       this.lastPosition = [x, y];
 
       console.log(
-        page.texture,
+        tile.texture,
         this.brush,
         this.brush.texture,
         this.brush.texture._source,
@@ -118,7 +118,7 @@ export class CrayonBrush extends BaseBrush {
 
       this.app.renderer.render({
         container: this.brush,
-        target: page.texture,
+        target: tile.texture,
         clear: false,
       });
     }

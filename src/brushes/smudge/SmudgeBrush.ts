@@ -2,7 +2,7 @@ import * as PIXI from "pixi.js";
 
 import { BaseBrush } from "../BaseBrush";
 import { SmudgeShader } from "./SmudgeShader";
-import type { PixiPage } from "../../PixiPage";
+import type { PixiTile } from "../../PixiTile";
 import { BrushKind } from "../../enums";
 
 export class SmudgeBrush extends BaseBrush {
@@ -59,7 +59,7 @@ export class SmudgeBrush extends BaseBrush {
     this.brush.shader.brushSize = value;
   }
 
-  draw(pointA: [number, number], pointB: [number, number], page: PixiPage) {
+  draw(pointA: [number, number], pointB: [number, number], tile: PixiTile) {
     const distance = Math.sqrt(
       Math.pow(pointB[0] - pointA[0], 2) + Math.pow(pointB[1] - pointA[1], 2)
     );
@@ -79,24 +79,24 @@ export class SmudgeBrush extends BaseBrush {
       const renderTexture = this.brush.shader.texture;
       const start = points[i];
       const end = points[i + 1];
-      transform.tx = -start[0] + page.position.x + renderTexture.width / 2;
-      transform.ty = start[1] + page.position.y + renderTexture.height / 2;
+      transform.tx = -start[0] + tile.position.x + renderTexture.width / 2;
+      transform.ty = start[1] + tile.position.y + renderTexture.height / 2;
       this.app.renderer.render({
-        container: page.mesh,
+        container: tile.mesh,
         target: renderTexture,
         transform,
         clear: true,
       });
 
-      const x = end[0] - page.position.x - renderTexture.width / 2;
-      const y = end[1] - page.position.y - renderTexture.width / 2;
+      const x = end[0] - tile.position.x - renderTexture.width / 2;
+      const y = end[1] - tile.position.y - renderTexture.width / 2;
 
       this.brush.position.x = x;
       this.brush.position.y = y;
 
       this.app.renderer.render({
         container: this.brush,
-        target: page.texture,
+        target: tile.texture,
         clear: false,
       });
 
