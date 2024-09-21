@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      /* --primary-color: #f5f5f5; */
+      :root {
+        --primary-color: #d94141;
+        --toolbar-color: #d1d5f0;
+        --gray-dark: #0f171f;
+        --gray-medium: #293845;
+        --gray-light: #384957;
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- <div id="app" style="width: 100vw; height: 100vh"></div> -->
+    <script type="module" src="/src/sketch-paper.ts"></script>
+    <sketch-paper></sketch-paper>
+
+    <!-- <script type="module">
+      import { Studio } from "/src/Studio.ts";
+
+      const app = document.getElementById("app");
+      const studio = new Studio();
+
+      studio.initialize(app, {
+        minZoom: 0.25,
+        maxZoom: 10,
+        tileWidth: 2048,
+        tileHeight: 2048,
+      });
+    </script> -->
+  </body>
+</html>

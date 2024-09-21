@@ -1,0 +1,21 @@
+title: Hello Web Components
+description: >
+  A simple starter hello world web component written in typescript, using lit
+
+main_nav:
+  - title: Get Started
+    url: /getting-started
+
+content_table:
+  - title: Get Started
+    url: /getting-started
+
+google_analytics: G-2MWB7NGC05
+
+remote_theme: fernandopasik/jekyll-theme-material-docs
+
+plugins:
+  # already included in github, but to enable local dev
+  - jekyll-github-metadata
+  - jekyll-remote-theme
+  - jekyll-seo-tag

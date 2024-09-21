@@ -1,0 +1,64 @@
+{
+  "extends": [
+    "airbnb-base",
+    "plugin:@typescript-eslint/all",
+    "plugin:import/typescript",
+    "plugin:require-extensions/recommended",
+    "plugin:lit-a11y/recommended",
+    "plugin:lit/all",
+    "plugin:storybook/csf",
+    "plugin:storybook/recommended",
+    "plugin:wc/best-practice",
+    "prettier"
+  ],
+  "env": { "browser": true },
+  "overrides": [
+    {
+      "files": [".storybook/**", "*.e2e.*", "*.spec.*", "*.stories.*"],
+      "rules": {
+        "@typescript-eslint/no-magic-numbers": "off",
+        "import/no-extraneous-dependencies": ["error", { "devDependencies": true }],
+        "max-lines": "off",
+        "max-lines-per-function": "off"
+      }
+    },
+    {
+      "files": ["*.e2e.*"],
+      "env": { "jest": true },
+      "globals": { "browser": true, "context": true, "jestPuppeteer": true, "page": true }
+    },
+    { "files": ["*.stories.*"], "rules": { "import/extensions": ["error", "never"] } }
+  ],
+  "parserOptions": {
+    "project": "**/tsconfig.json",
+    "globals": {
+      "__dirname": true
+    },
+    "overrides": [
+      {
+        "parserOptions": {
+          "project": "**/tsconfig.json",
+          "sourceType": "module"
+        }
+      }
+    ]
+  },
+  "settings": { "import/resolver": { "typescript": {} } },
+  "rules": {
+    "@typescript-eslint/no-magic-numbers": "off",
+    "@typescript-eslint/prefer-readonly-parameter-types": "off",
+    "@typescript-eslint/naming-convention": "off",
+    "@typescript-eslint/unbound-method": "off",
+    "no-underscore-dangle": "off",
+    "import/extensions": "off",
+    "storybook/prefer-pascal-case": "off",
+    "no-continue": "off",
+    "no-restricted-syntax": "off",
+    "@typescript-eslint/max-params": "off",
+    "@typescript-eslint/prefer-destructuring": "off",
+    "no-bitwise": "off",
+    "no-plusplus": "off",
+    "@typescript-eslint/prefer-for-of": "off",
+    "lit/attribute-value-entities": "off"
+  }
+}

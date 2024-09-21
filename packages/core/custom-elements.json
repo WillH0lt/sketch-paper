@@ -1,0 +1,29 @@
+{
+  "version": "experimental",
+  "tags": [
+    {
+      "name": "sketch-paper",
+      "path": "./src\\lib\\sketch-paper.ts",
+      "attributes": [
+        {
+          "name": "who",
+          "type": "string",
+          "default": "\"world\""
+        }
+      ],
+      "properties": [
+        {
+          "name": "styles",
+          "type": "CSSResult",
+          "default": "\"css`\\n    :host {\\n      font-size: 2em;\\n    }\\n\\n    .who {\\n      color: var(--hello-world-who-color, DodgerBlue);\\n    }\\n  `\""
+        },
+        {
+          "name": "who",
+          "attribute": "who",
+          "type": "string",
+          "default": "\"world\""
+        }
+      ]
+    }
+  ]
+}

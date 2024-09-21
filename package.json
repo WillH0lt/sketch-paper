@@ -1,41 +1,17 @@
 {
-  "name": "studio",
-  "private": true,
+  "name": "@sketch-paper/monorepo",
+  "description": "",
   "version": "0.0.0",
-  "type": "module",
+  "private": true,
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "dependencies": {
-    "@lastolivegames/becsy": "^0.15.5",
-    "@shoelace-style/shoelace": "^2.14.0",
-    "@twind/core": "^1.1.3",
-    "@twind/preset-autoprefix": "^1.0.7",
-    "@twind/preset-tailwind": "^1.1.4",
-    "@twind/with-web-components": "^1.1.3",
-    "detect-it": "^4.0.1",
-    "html-to-image": "^1.11.11",
-    "html2canvas": "github:ioanh/html2canvas",
-    "jsondiffpatch": "^0.6.0",
-    "lexorank": "^1.0.5",
-    "lit": "^3.1.2",
-    "pixi-viewport": "^5.0.3",
-    "pixi.js": "8.0.5",
-    "roughjs": "^4.6.6",
-    "stats.js": "^0.17.0",
-    "strict-event-emitter": "^0.5.1",
-    "uuid": "^9.0.1"
-  },
-  "devDependencies": {
-    "@types/stats.js": "^0.17.3",
-    "@types/uuid": "^9.0.8",
-    "typescript": "^5.2.2",
-    "vite": "^5.1.6",
-    "vite-plugin-glsl": "^1.3.0",
-    "vite-tsconfig-paths": "^4.3.1"
-  },
+  "keywords": [],
+  "author": "",
+  "workspaces": [
+    "examples/*",
+    "packages/*"
+  ],
   "pnpm": {
     "overrides": {
       "typescript": "5.4.2"
