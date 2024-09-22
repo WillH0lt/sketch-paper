@@ -40,8 +40,8 @@ class InputReader extends BaseSystem {
     // ==========================================================================
     const pointerMoveFn = (e: PointerEvent): void => {
       const prevPointerClient = this.input.pointerClient;
-      this.input.pointerClient = [e.clientX, e.clientY];
-      const pointerWorld = this.viewport.toWorld(e.clientX, e.clientY);
+      this.input.pointerClient = [e.offsetX, e.offsetY];
+      const pointerWorld = this.viewport.toWorld(e.offsetX, e.offsetY);
       this.input.pointerWorld = [pointerWorld.x, pointerWorld.y];
 
       if (this.pointerIds.size === 1) {
@@ -77,8 +77,8 @@ class InputReader extends BaseSystem {
       this.setInputTrigger('pointerDownTrigger');
 
       if (this.pointerIds.size === 1) {
-        this.input.pointerClient = [e.clientX, e.clientY];
-        const pointerWorld = this.viewport.toWorld(e.clientX, e.clientY);
+        this.input.pointerClient = [e.offsetX, e.offsetY];
+        const pointerWorld = this.viewport.toWorld(e.offsetX, e.offsetY);
         this.input.pointerWorld = [pointerWorld.x, pointerWorld.y];
         // pointerPosition.toArray(this.input.dragStart);
       } else {

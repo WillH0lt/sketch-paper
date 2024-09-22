@@ -7,7 +7,7 @@ export default defineConfig({
   plugins: [glsl()],
   build: {
     lib: {
-      entry: 'src/hello-web-components.ts',
+      entry: 'src/sketchy-draw.ts',
       formats: ['es'],
     },
     rollupOptions: {

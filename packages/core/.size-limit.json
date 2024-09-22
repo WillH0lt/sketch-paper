@@ -1,7 +1,7 @@
 [
   {
     "gzip": true,
-    "limit": "600 B",
-    "path": "hello-web-components.min.js"
+    "limit": "32 kB",
+    "path": "./dist/sketchy-draw.min.js"
   }
 ]

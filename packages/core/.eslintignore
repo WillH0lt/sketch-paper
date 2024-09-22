@@ -1,6 +1,6 @@
 node_modules
 /coverage
 !/.storybook
-/lib
-/hello-web-components.*
+/dist
+/artifacts
 _site

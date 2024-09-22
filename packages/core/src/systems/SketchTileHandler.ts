@@ -92,7 +92,8 @@ class SketchTileHandler extends SketchBase {
       pixiTile.position.set(tile.position[0], tile.position[1]);
 
       const sprite = new PIXI.Sprite(PIXI.Texture.WHITE);
-      sprite.tint = Math.random() * 0xffffff;
+      // sprite.tint = Math.random() * 0xffffff;
+      sprite.tint = 0x000000;
       sprite.width = this.settings.tileWidth;
       sprite.height = this.settings.tileHeight;
 

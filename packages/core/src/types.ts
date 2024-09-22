@@ -32,5 +32,12 @@ export interface Settings {
 
 export interface Events extends EventMap {
   updateBrush: [Brush];
-  draw: [pointA: [number, number], pointB: [number, number]];
+  draw: [
+    {
+      startX: number;
+      startY: number;
+      endX: number;
+      endY: number;
+    },
+  ];
 }

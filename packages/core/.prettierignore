@@ -1,7 +1,8 @@
 .husky/_
 /LICENSE
 /coverage
-/hello-web-components.*
+/dist
+/artifacts
 /index.html
 /lib
 _layouts/compress.html

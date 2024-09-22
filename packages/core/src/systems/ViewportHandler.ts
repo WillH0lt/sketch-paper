@@ -23,8 +23,8 @@ class ViewportHandler extends System {
     this.viewport.update(this.delta);
 
     if (this.resized) {
-      this.app.renderer.resize(this.container.clientWidth, this.container.clientHeight);
-      this.viewport.resize(this.container.clientWidth, this.container.clientHeight);
+      this.app.renderer.resize(this.container.offsetWidth, this.container.offsetHeight);
+      this.viewport.resize(this.container.offsetWidth, this.container.offsetHeight);
 
       this.resized = false;
     }

@@ -6,33 +6,44 @@ import { rollupPluginHTML as html } from '@web/rollup-plugin-html';
 import glslify from 'rollup-plugin-glslify';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import serve from 'rollup-plugin-serve';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import dts from 'rollup-plugin-dts';
 
 const isServe = Boolean(process.env.SERVE);
 
-export default {
-  input: 'artifacts/hello-web-components.js',
-  output: {
-    dir: 'dist',
-    entryFileNames: '[name].min.js',
-    format: 'esm',
-    sourcemap: true,
+const config = [
+  {
+    input: 'artifacts/sketchy-draw.js',
+    output: {
+      dir: 'dist',
+      entryFileNames: '[name].min.js',
+      format: 'esm',
+      sourcemap: true,
+    },
+    external: isServe ? [] : [/lit/],
+    onwarn(warning, warn) {
+      if (warning.code === 'THIS_IS_UNDEFINED') {
+        return;
+      }
+      warn(warning);
+    },
+    plugins: isServe
+      ? [resolve(), html(), serve()]
+      : [
+          glslify(),
+          // terser({
+          //   mangle: {
+          //     module: true,
+          //     properties: true,
+          //   },
+          // }),
+        ],
   },
-  external: isServe ? [] : [/lit/],
-  onwarn(warning, warn) {
-    if (warning.code === 'THIS_IS_UNDEFINED') {
-      return;
-    }
-    warn(warning);
+  {
+    input: './artifacts/sketchy-draw.d.ts',
+    output: [{ file: 'dist/sketchy-draw.d.ts', format: 'esm' }],
+    plugins: [dts()],
   },
-  plugins: isServe
-    ? [resolve(), html(), serve()]
-    : [
-        glslify(),
-        // terser({
-        //   mangle: {
-        //     module: true,
-        //     properties: true,
-        //   },
-        // }),
-      ],
-};
+];
+
+export default config;

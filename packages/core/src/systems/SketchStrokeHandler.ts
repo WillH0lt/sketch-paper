@@ -165,9 +165,14 @@ class SketchStrokeHandler extends SketchBase {
       this.brushInstance.draw(prevPoint, currentPoint, tile);
     }
 
-    // if (intersected.length > 0) {
-    //   this.emitter.emit('draw', prevPoint, currentPoint);
-    // }
+    if (intersected.length > 0) {
+      this.emitter.emit('draw', {
+        startX: prevPoint[0],
+        startY: prevPoint[1],
+        endX: currentPoint[0],
+        endY: currentPoint[1],
+      });
+    }
 
     return intersected;
   }

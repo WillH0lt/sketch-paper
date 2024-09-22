@@ -59,6 +59,8 @@
     "no-bitwise": "off",
     "no-plusplus": "off",
     "@typescript-eslint/prefer-for-of": "off",
-    "lit/attribute-value-entities": "off"
+    "lit/attribute-value-entities": "off",
+    "no-console": "off",
+    "wc/guard-super-call": "off"
   }
 }
