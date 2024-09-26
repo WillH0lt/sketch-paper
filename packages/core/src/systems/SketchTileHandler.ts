@@ -11,7 +11,7 @@ import SketchFloodFillHandler from './SketchFloodFillHandler.js';
 import SketchShapeHandler from './SketchShapeHandler.js';
 import SketchStrokeHandler from './SketchStrokeHandler.js';
 import ViewportHandler from './ViewportHandler.js';
-import { waitForPromise } from './common.js';
+import { hexToNumber, waitForPromise } from './common.js';
 
 @system((s) =>
   s.inAnyOrderWith(
@@ -52,6 +52,7 @@ class SketchTileHandler extends SketchBase {
     let tmpSprite: PIXI.Sprite | null = null;
     if (image === '') {
       tmpSprite = new PIXI.Sprite(PIXI.Texture.WHITE);
+      tmpSprite.tint = hexToNumber(this.settings.baseColor);
       tmpSprite.width = this.settings.tileWidth;
       tmpSprite.height = this.settings.tileHeight;
     } else {
@@ -92,8 +93,8 @@ class SketchTileHandler extends SketchBase {
       pixiTile.position.set(tile.position[0], tile.position[1]);
 
       const sprite = new PIXI.Sprite(PIXI.Texture.WHITE);
-      // sprite.tint = Math.random() * 0xffffff;
-      sprite.tint = 0x000000;
+      const tint = hexToNumber(this.settings.baseColor);
+      sprite.tint = tint;
       sprite.width = this.settings.tileWidth;
       sprite.height = this.settings.tileHeight;
 

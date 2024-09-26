@@ -28,11 +28,20 @@ export interface Settings {
   tileWidth: number;
   tileHeight: number;
   assetsPath: string;
+  baseColor: string;
 }
 
 export interface Events extends EventMap {
   updateBrush: [Brush];
-  draw: [
+  'draw-outgoing': [
+    {
+      startX: number;
+      startY: number;
+      endX: number;
+      endY: number;
+    },
+  ];
+  'draw-incoming': [
     {
       startX: number;
       startY: number;

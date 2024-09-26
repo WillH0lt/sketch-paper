@@ -41,3 +41,7 @@ export function hexToRgba(hex: string): [number, number, number, number] {
 
   return [(bigint >> 24) & 255, (bigint >> 16) & 255, (bigint >> 8) & 255, bigint & 255];
 }
+
+export function hexToNumber(hex: string): number {
+  return parseInt(hex.slice(1), 16);
+}

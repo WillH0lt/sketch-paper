@@ -7,6 +7,7 @@ import * as PIXI from 'pixi.js';
 import { Emitter } from 'strict-event-emitter';
 
 import * as comps from '../../components/index.js';
+import { hexToNumber } from '../../systems/common.js';
 import * as sys from '../../systems/index.js';
 import type { Events, Settings } from '../../types.js';
 import { BrushKindEnum } from '../../types.js';
@@ -28,6 +29,7 @@ class SketchyDrawCanvas extends SdBaseElement {
     tileWidth: 2048,
     tileHeight: 2048,
     assetsPath: 'https://storage.googleapis.com/sketch-paper-public',
+    baseColor: '#000000',
   };
 
   @query('#container')
@@ -50,6 +52,12 @@ class SketchyDrawCanvas extends SdBaseElement {
     for (const cb of this.onDestroyCallbacks) {
       cb();
     }
+  }
+
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
+  public draw(startX: number, startY: number, endX: number, endY: number): void {
+    this.emitter.emit('draw-incoming', { startX, startY, endX, endY });
+    // console.log('draw', startX, startY, endX, endY);
   }
 
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
@@ -100,7 +108,7 @@ class SketchyDrawCanvas extends SdBaseElement {
     app.renderer.canvas.style.width = '100%';
     app.renderer.canvas.style.height = '100%';
     this.container.appendChild(app.renderer.canvas);
-    app.renderer.background.color = 0xebecf0;
+    app.renderer.background.color = hexToNumber(this.settings.baseColor);
 
     const viewport = new Viewport({
       screenWidth: this.container.offsetWidth,
@@ -140,7 +148,7 @@ class SketchyDrawCanvas extends SdBaseElement {
       this.emit('sd-move', { detail: { x, y } });
     });
 
-    this.emitter.on('draw', ({ startX, startY, endX, endY }) => {
+    this.emitter.on('draw-outgoing', ({ startX, startY, endX, endY }) => {
       this.emit('sd-draw', {
         detail: {
           startX: Math.round(startX),

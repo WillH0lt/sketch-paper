@@ -4,7 +4,7 @@ import Tile from './Tile.js';
 
 @component
 class Stroke {
-  @field.float64.vector(2) public declare prevPoint: [number, number];
+  @field.int32.vector(2) public declare prevPoint: [number, number];
 
   @field.backrefs(Tile) public declare tiles: Entity[];
 }

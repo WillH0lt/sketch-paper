@@ -3,7 +3,6 @@ import type { Viewport } from 'pixi-viewport';
 import * as PIXI from 'pixi.js';
 import type { Emitter } from 'strict-event-emitter';
 
-import type PixiTile from '../PixiTile.js';
 import * as comps from '../components/index.js';
 import type { Events } from '../types.js';
 import { BrushKindEnum as BrushKind } from '../types.js';
@@ -96,6 +95,38 @@ class SketchStrokeHandler extends SketchBase {
     }
   }
 
+  @co private *renderStroke(
+    prevPoint: [number, number],
+    currentPoint: [number, number],
+  ): Generator {
+    if (!this.brushInstance) return;
+
+    const intersectedA = this.getIntersectedTiles(prevPoint);
+    const intersectedB = this.getIntersectedTiles(currentPoint);
+
+    // get union of A and B
+    const intersected = intersectedA
+      .concat(intersectedB)
+      .filter((tile, index, self) => index === self.findIndex((t) => t === tile));
+
+    for (const tile of intersected) {
+      this.brushInstance.draw(prevPoint, currentPoint, tile);
+    }
+
+    // return intersected;
+
+    yield;
+  }
+
+  public initialize(): void {
+    super.initialize();
+
+    this.emitter.on('draw-incoming', ({ startX, startY, endX, endY }) => {
+      console.log('draw-incoming', startX, startY, endX, endY);
+      this.renderStroke([startX, startY], [endX, endY]);
+    });
+  }
+
   public execute(): void {
     if (this.settings.added.length > 0) {
       const settings = this.settings.added[0].read(comps.Settings);
@@ -126,16 +157,27 @@ class SketchStrokeHandler extends SketchBase {
     // render strokes
     for (const strokeEntity of this.strokes.current) {
       const stroke = strokeEntity.write(comps.Stroke);
-      const sprites = this.renderStroke(stroke.prevPoint, this.input.pointerWorld);
+      // const sprites =
+      const start = [stroke.prevPoint[0], stroke.prevPoint[1]] as [number, number];
+      const end = [this.input.pointerWorld[0], this.input.pointerWorld[1]] as [number, number];
       stroke.prevPoint = this.input.pointerWorld;
 
-      for (const sprite of sprites) {
-        const tileEntity = this.getTileEntity(sprite);
-        if (tileEntity) {
-          const tile = tileEntity.write(comps.Tile);
-          tile.strokeEntity = strokeEntity;
-        }
-      }
+      this.renderStroke(start, end);
+
+      // for (const sprite of sprites) {
+      //   const tileEntity = this.getTileEntity(sprite);
+      //   if (tileEntity) {
+      //     const tile = tileEntity.write(comps.Tile);
+      //     tile.strokeEntity = strokeEntity;
+      //   }
+      // }
+
+      this.emitter.emit('draw-outgoing', {
+        startX: start[0],
+        startY: start[1],
+        endX: end[0],
+        endY: end[1],
+      });
     }
 
     // delete strokes on pointer up
@@ -148,33 +190,6 @@ class SketchStrokeHandler extends SketchBase {
 
       this.brushInstance?.reset();
     }
-  }
-
-  private renderStroke(prevPoint: [number, number], currentPoint: [number, number]): PixiTile[] {
-    if (!this.brushInstance) return [];
-
-    const intersectedA = this.getIntersectedTiles(prevPoint);
-    const intersectedB = this.getIntersectedTiles(currentPoint);
-
-    // get union of A and B
-    const intersected = intersectedA
-      .concat(intersectedB)
-      .filter((tile, index, self) => index === self.findIndex((t) => t === tile));
-
-    for (const tile of intersected) {
-      this.brushInstance.draw(prevPoint, currentPoint, tile);
-    }
-
-    if (intersected.length > 0) {
-      this.emitter.emit('draw', {
-        startX: prevPoint[0],
-        startY: prevPoint[1],
-        endX: currentPoint[0],
-        endY: currentPoint[1],
-      });
-    }
-
-    return intersected;
   }
 }
 
