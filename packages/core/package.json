@@ -1,6 +1,6 @@
 {
   "name": "@sketchy-draw/core",
-  "version": "1.4.0",
+  "version": "1.0.0",
   "type": "module",
   "description": "A simple starter hello world web component written in typescript, using lit",
   "repository": "fernandopasik/hello-web-components",
@@ -54,7 +54,7 @@
     "jsondiffpatch": "^0.6.0",
     "perfect-freehand": "^1.2.2",
     "pixi-viewport": "^5.0.3",
-    "pixi.js": "7.4.2",
+    "pixi.js": "8.4.1",
     "strict-event-emitter": "^0.5.1",
     "uuid": "^9.0.1"
   },
