@@ -10,7 +10,7 @@ class Settings {
 
   @field.uint16 public declare tileHeight: number;
 
-  @field.dynamicString(512) public declare assetsPath: string;
+  @field.dynamicString(512) public declare baseUrl: string;
 
   @field.dynamicString(7) public declare baseColor: string;
 }

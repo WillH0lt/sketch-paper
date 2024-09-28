@@ -4,23 +4,13 @@ import type { Viewport } from 'pixi-viewport';
 import * as PIXI from 'pixi.js';
 import { v4 as uuid } from 'uuid';
 
-import PixiTile from '../PixiTile.js';
 import * as comps from '../components/index.js';
 import SketchBase from './SketchBase.js';
-import SketchFloodFillHandler from './SketchFloodFillHandler.js';
-import SketchShapeHandler from './SketchShapeHandler.js';
 import SketchStrokeHandler from './SketchStrokeHandler.js';
 import ViewportHandler from './ViewportHandler.js';
-import { hexToNumber, waitForPromise } from './common.js';
+import { getTileImageUrl, hexToNumber, waitForPromise } from './common.js';
 
-@system((s) =>
-  s.inAnyOrderWith(
-    ViewportHandler,
-    SketchStrokeHandler,
-    SketchShapeHandler,
-    SketchFloodFillHandler,
-  ),
-)
+@system((s) => s.inAnyOrderWith(ViewportHandler, SketchStrokeHandler))
 class SketchTileHandler extends SketchBase {
   public readonly app!: PIXI.Application;
 
@@ -38,13 +28,13 @@ class SketchTileHandler extends SketchBase {
   );
 
   @co private *applyImageToTile(tileEntity: Entity): Generator {
-    const pixiTile = this.getPixiTile(tileEntity);
+    const tileSprite = this.getTileSprite(tileEntity);
 
-    if (!pixiTile) return;
+    if (!tileSprite) return;
 
     const tileSourceEntity = tileEntity.read(comps.Tile).source;
     const image = tileSourceEntity.read(comps.TileSource).image;
-    if (pixiTile.texture.source.label === image) return;
+    if (tileSprite.texture.source.label === image) return;
 
     const heldTileEntity = tileEntity.hold();
     heldTileEntity.write(comps.Tile).loading = true;
@@ -69,11 +59,11 @@ class SketchTileHandler extends SketchBase {
 
     this.app.renderer.render({
       container: tmpSprite,
-      target: pixiTile.texture,
+      target: tileSprite.texture,
       clear: true,
     });
 
-    pixiTile.texture.source.label = image;
+    tileSprite.texture.source.label = image;
     // yield* this.waitForPromise(PIXI.Assets.unload(image));
 
     heldTileEntity.write(comps.Tile).loading = false;
@@ -88,9 +78,13 @@ class SketchTileHandler extends SketchBase {
       const tile = tileEntity.read(comps.Tile);
       const source = tile.source.read(comps.TileSource);
 
-      const pixiTile = new PixiTile(this.settings.tileWidth, this.settings.tileHeight);
-      pixiTile.label = source.label;
-      pixiTile.position.set(tile.position[0], tile.position[1]);
+      const texture = PIXI.RenderTexture.create({
+        width: this.settings.tileWidth,
+        height: this.settings.tileHeight,
+      });
+      const tileSprite = new PIXI.Sprite(texture);
+      tileSprite.label = source.label;
+      tileSprite.position.set(tile.position[0], tile.position[1]);
 
       const sprite = new PIXI.Sprite(PIXI.Texture.WHITE);
       const tint = hexToNumber(this.settings.baseColor);
@@ -100,11 +94,11 @@ class SketchTileHandler extends SketchBase {
 
       this.app.renderer.render({
         container: sprite,
-        target: pixiTile.texture,
+        target: tileSprite.texture,
         clear: true,
       });
 
-      this.viewport.addChild(pixiTile);
+      this.viewport.addChild(tileSprite);
     }
 
     // update tile sprite positions and images
@@ -156,13 +150,16 @@ class SketchTileHandler extends SketchBase {
 
         const sourceEntity = this.createEntity(comps.TileSource, {
           label: uuid(),
+          image: getTileImageUrl(this.settings.baseUrl, x, y),
         });
 
         this.createEntity(comps.Tile, {
-          // label: uuid(),
           position: [positionX, positionY],
+          index: [x, y],
           source: sourceEntity,
         });
+
+        this.applyImageToTile(sourceEntity.read(comps.TileSource).tiles[0]);
       }
     }
   }

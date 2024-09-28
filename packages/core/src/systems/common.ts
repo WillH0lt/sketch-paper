@@ -45,3 +45,7 @@ export function hexToRgba(hex: string): [number, number, number, number] {
 export function hexToNumber(hex: string): number {
   return parseInt(hex.slice(1), 16);
 }
+
+export function getTileImageUrl(baseUrl: string, tileX: number, tileY: number): string {
+  return `${baseUrl}/${tileX}_${tileY}.png`;
+}

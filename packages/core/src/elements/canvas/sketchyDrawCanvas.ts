@@ -9,7 +9,7 @@ import { Emitter } from 'strict-event-emitter';
 import * as comps from '../../components/index.js';
 import { hexToNumber } from '../../systems/common.js';
 import * as sys from '../../systems/index.js';
-import type { Events, Settings } from '../../types.js';
+import type { DrawSegment, Events, Settings } from '../../types.js';
 import { BrushKindEnum } from '../../types.js';
 import SdBaseElement from '../base/sketchyDrawBase.js';
 
@@ -28,7 +28,7 @@ class SketchyDrawCanvas extends SdBaseElement {
     maxZoom: 10,
     tileWidth: 2048,
     tileHeight: 2048,
-    assetsPath: 'https://storage.googleapis.com/sketch-paper-public',
+    baseUrl: 'http://localhost:8086/v1/image',
     baseColor: '#000000',
   };
 
@@ -54,10 +54,8 @@ class SketchyDrawCanvas extends SdBaseElement {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
-  public draw(startX: number, startY: number, endX: number, endY: number): void {
-    this.emitter.emit('draw-incoming', { startX, startY, endX, endY });
-    // console.log('draw', startX, startY, endX, endY);
+  public draw(segment: DrawSegment): void {
+    this.emitter.emit('draw-incoming', segment);
   }
 
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
@@ -111,8 +109,8 @@ class SketchyDrawCanvas extends SdBaseElement {
     app.renderer.background.color = hexToNumber(this.settings.baseColor);
 
     const viewport = new Viewport({
-      screenWidth: this.container.offsetWidth,
-      screenHeight: this.container.offsetHeight,
+      // screenWidth: this.container.offsetWidth,
+      // screenHeight: this.container.offsetHeight,
       // worldWidth: 6000,
       // worldHeight: 6000,
       events: app.renderer.events,
@@ -148,13 +146,10 @@ class SketchyDrawCanvas extends SdBaseElement {
       this.emit('sd-move', { detail: { x, y } });
     });
 
-    this.emitter.on('draw-outgoing', ({ startX, startY, endX, endY }) => {
+    this.emitter.on('draw-outgoing', (segment: DrawSegment) => {
       this.emit('sd-draw', {
         detail: {
-          startX: Math.round(startX),
-          startY: Math.round(startY),
-          endX: Math.round(endX),
-          endY: Math.round(endY),
+          ...segment,
         },
       });
     });
@@ -173,11 +168,7 @@ class SketchyDrawCanvas extends SdBaseElement {
     const renderGroup = System.group(
       sys.SketchTileHandler,
       resources,
-      sys.SketchShapeHandler,
-      resources,
       sys.SketchStrokeHandler,
-      resources,
-      sys.SketchFloodFillHandler,
       resources,
       sys.ViewportHandler,
       resources,

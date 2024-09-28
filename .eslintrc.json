@@ -12,6 +12,7 @@
     "prettier"
   ],
   "env": { "browser": true },
+  "ignorePatterns": ["vite.config.ts"],
   "overrides": [
     {
       "files": [".storybook/**", "*.e2e.*", "*.spec.*", "*.stories.*"],

@@ -1,22 +1,16 @@
 import { co, system } from '@lastolivegames/becsy';
+import type { BaseBrush } from '@sketchy-draw/brushes';
+import { CrayonBrush } from '@sketchy-draw/brushes';
 import type { Viewport } from 'pixi-viewport';
-import * as PIXI from 'pixi.js';
+import type * as PIXI from 'pixi.js';
 import type { Emitter } from 'strict-event-emitter';
 
 import * as comps from '../components/index.js';
-import type { Events } from '../types.js';
-import { BrushKindEnum as BrushKind } from '../types.js';
+import type { DrawSegment, Events } from '../types.js';
 import SketchBase from './SketchBase.js';
-import SketchFloodFillHandler from './SketchFloodFillHandler.js';
 import { deleteEntity, hexToRgba, waitForPromise } from './common.js';
 
-import type BaseBrush from '../brushes/BaseBrush.js';
-import CrayonBrush from '../brushes/crayon/index.js';
-import MarkerBrush from '../brushes/marker/index.js';
-import PaintBrush from '../brushes/paint/index.js';
-import SmudgeBrush from '../brushes/smudge/index.js';
-
-@system((s) => s.inAnyOrderWith(SketchFloodFillHandler))
+@system
 class SketchStrokeHandler extends SketchBase {
   public readonly app!: PIXI.Application;
 
@@ -28,92 +22,78 @@ class SketchStrokeHandler extends SketchBase {
 
   private readonly brush = this.singleton.read(comps.Brush);
 
-  private readonly settings = this.query((q) => q.added.with(comps.Settings));
-
   private readonly brushes = this.query((q) => q.addedOrChanged.with(comps.Brush).trackWrites);
 
   private readonly strokes = this.query((q) => q.current.with(comps.Stroke).write);
 
+  private readonly tiles = this.query((q) => q.current.with(comps.Tile));
+
   private brushInstance: BaseBrush | null = null;
 
-  // public constructor() {
-  //   super();
-
-  //   PIXI.Assets.add([
-  //     { alias: 'crayonShape', src: '/img/brushes/crayon/shape.png' },
-  //     { alias: 'smudge', src: '/img/brushes/smudge/shape.png' },
-  //     { alias: 'paintShape', src: '/img/brushes/paint/shape.png' },
-  //     { alias: 'paintGrain', src: '/img/brushes/paint/grain.png' },
-  //     { alias: 'markerShape', src: '/img/brushes/marker/shape.png' },
-  //   ]);
-  // }
-
-  @co private *updateBrushInstance(brush: comps.Brush): Generator {
+  @co private *updateBrushInstance(): Generator {
     co.cancelIfCoroutineStarted();
-    // const brush = brushEntity.read(comps.Brush);
-    if (brush.kind === BrushKind.Crayon) {
-      if (this.brushInstance === null || this.brushInstance.kind !== BrushKind.Crayon) {
-        const textures = (yield* waitForPromise(
-          PIXI.Assets.load(['crayonShape', 'paintGrain']),
-        )) as { crayonShape: PIXI.Texture; paintGrain: PIXI.Texture };
 
-        this.brushInstance = new CrayonBrush(this.app, textures.crayonShape, textures.paintGrain);
-      }
-    } else if (brush.kind === BrushKind.Smudge) {
-      if (this.brushInstance === null || this.brushInstance.kind !== BrushKind.Smudge) {
-        const shapeTexture = (yield* waitForPromise(PIXI.Assets.load('smudge'))) as PIXI.Texture;
-        this.brushInstance = new SmudgeBrush(this.app, shapeTexture);
-      }
-    } else if (brush.kind === BrushKind.Paint) {
-      if (this.brushInstance === null || this.brushInstance.kind !== BrushKind.Paint) {
-        const textures = (yield* waitForPromise(
-          PIXI.Assets.load(['paintShape', 'paintGrain']),
-        )) as {
-          paintShape: PIXI.Texture;
-          paintGrain: PIXI.Texture;
-        };
-        const shapeTexture = textures.paintShape;
-        const grainTexture = textures.paintGrain;
-        this.brushInstance = new PaintBrush(this.app, shapeTexture, grainTexture);
-      }
-    } else if (brush.kind === BrushKind.Marker) {
-      if (this.brushInstance === null || this.brushInstance.kind !== BrushKind.Marker) {
-        const textures = (yield* waitForPromise(
-          PIXI.Assets.load(['markerShape', 'paintGrain']),
-        )) as { markerShape: PIXI.Texture; paintGrain: PIXI.Texture };
-        const shapeTexture = textures.markerShape;
-        const grainTexture = textures.paintGrain;
-        this.brushInstance = new MarkerBrush(this.app, shapeTexture, grainTexture);
-      }
-    } else {
-      this.brushInstance = null;
-    }
+    this.brushInstance = new CrayonBrush(this.app);
+    yield* waitForPromise(this.brushInstance.init());
 
-    if (this.brushInstance) {
-      this.brushInstance.size = this.brush.size;
-      this.brushInstance.color = hexToRgba(this.brush.color);
-    }
+    // if (brush.kind === BrushKind.Crayon) {
+    //   if (this.brushInstance === null || this.brushInstance.kind !== BrushKind.Crayon) {
+    //     const textures = (yield* waitForPromise(
+    //       PIXI.Assets.load(['crayonShape', 'paintGrain']),
+    //     )) as { crayonShape: PIXI.Texture; paintGrain: PIXI.Texture };
+
+    //     this.brushInstance = new CrayonBrush(this.app, textures.crayonShape, textures.paintGrain);
+    //   }
+    // } else if (brush.kind === BrushKind.Smudge) {
+    //   if (this.brushInstance === null || this.brushInstance.kind !== BrushKind.Smudge) {
+    //     const shapeTexture = (yield* waitForPromise(PIXI.Assets.load('smudge'))) as PIXI.Texture;
+    //     this.brushInstance = new SmudgeBrush(this.app, shapeTexture);
+    //   }
+    // } else if (brush.kind === BrushKind.Paint) {
+    //   if (this.brushInstance === null || this.brushInstance.kind !== BrushKind.Paint) {
+    //     const textures = (yield* waitForPromise(
+    //       PIXI.Assets.load(['paintShape', 'paintGrain']),
+    //     )) as {
+    //       paintShape: PIXI.Texture;
+    //       paintGrain: PIXI.Texture;
+    //     };
+    //     const shapeTexture = textures.paintShape;
+    //     const grainTexture = textures.paintGrain;
+    //     this.brushInstance = new PaintBrush(this.app, shapeTexture, grainTexture);
+    //   }
+    // } else if (brush.kind === BrushKind.Marker) {
+    //   if (this.brushInstance === null || this.brushInstance.kind !== BrushKind.Marker) {
+    //     const textures = (yield* waitForPromise(
+    //       PIXI.Assets.load(['markerShape', 'paintGrain']),
+    //     )) as { markerShape: PIXI.Texture; paintGrain: PIXI.Texture };
+    //     const shapeTexture = textures.markerShape;
+    //     const grainTexture = textures.paintGrain;
+    //     this.brushInstance = new MarkerBrush(this.app, shapeTexture, grainTexture);
+    //   }
+    // } else {
+    //   this.brushInstance = null;
+    // }
+
+    // if (this.brushInstance) {
+    this.brushInstance.size = this.brush.size;
+    this.brushInstance.color = hexToRgba(this.brush.color);
+    // }
   }
 
-  @co private *renderStroke(
-    prevPoint: [number, number],
-    currentPoint: [number, number],
-  ): Generator {
-    if (!this.brushInstance) return;
+  @co private *handleDrawIncoming(segment: DrawSegment): Generator {
+    for (const tileEntity of this.tiles.current) {
+      const tile = tileEntity.read(comps.Tile);
+      if (tile.index[0] !== segment.tileX || tile.index[1] !== segment.tileY) continue;
 
-    const intersectedA = this.getIntersectedTiles(prevPoint);
-    const intersectedB = this.getIntersectedTiles(currentPoint);
+      const tileSprite = this.getTileSprite(tileEntity);
+      if (!tileSprite) continue;
 
-    // get union of A and B
-    const intersected = intersectedA
-      .concat(intersectedB)
-      .filter((tile, index, self) => index === self.findIndex((t) => t === tile));
-
-    for (const tile of intersected) {
-      this.brushInstance.draw(prevPoint, currentPoint, tile);
+      this.brushInstance?.draw(
+        [segment.startX, segment.startY],
+        [segment.endX, segment.endY],
+        tileSprite,
+      );
     }
-
-    // return intersected;
 
     yield;
   }
@@ -121,27 +101,16 @@ class SketchStrokeHandler extends SketchBase {
   public initialize(): void {
     super.initialize();
 
-    this.emitter.on('draw-incoming', ({ startX, startY, endX, endY }) => {
-      console.log('draw-incoming', startX, startY, endX, endY);
-      this.renderStroke([startX, startY], [endX, endY]);
+    this.emitter.on('draw-incoming', (segment: DrawSegment) => {
+      this.handleDrawIncoming(segment);
     });
   }
 
   public execute(): void {
-    if (this.settings.added.length > 0) {
-      const settings = this.settings.added[0].read(comps.Settings);
-      PIXI.Assets.add([
-        { alias: 'crayonShape', src: `${settings.assetsPath}/brushes/crayon/shape.png` },
-        { alias: 'smudge', src: `${settings.assetsPath}/brushes/smudge/shape.png` },
-        { alias: 'paintShape', src: `${settings.assetsPath}/brushes/paint/shape.png` },
-        { alias: 'paintGrain', src: `${settings.assetsPath}/brushes/paint/grain.png` },
-        { alias: 'markerShape', src: `${settings.assetsPath}/brushes/marker/shape.png` },
-      ]);
-    }
-
     for (const brushEntity of this.brushes.addedOrChanged) {
-      const brush = brushEntity.read(comps.Brush);
-      this.updateBrushInstance(brush);
+      // TODO pass brush to updateBrushInstance
+      brushEntity.read(comps.Brush);
+      this.updateBrushInstance();
     }
 
     if (this.input.pointerDownTrigger) {
@@ -150,34 +119,52 @@ class SketchStrokeHandler extends SketchBase {
           prevPoint: this.input.pointerWorld,
         });
 
-        this.renderStroke(this.input.pointerWorld, this.input.pointerWorld);
+        this.brushInstance.onStrokeStart();
       }
     }
 
     // render strokes
     for (const strokeEntity of this.strokes.current) {
       const stroke = strokeEntity.write(comps.Stroke);
-      // const sprites =
+
       const start = [stroke.prevPoint[0], stroke.prevPoint[1]] as [number, number];
-      const end = [this.input.pointerWorld[0], this.input.pointerWorld[1]] as [number, number];
+      const end = [
+        Math.round(this.input.pointerWorld[0]),
+        Math.round(this.input.pointerWorld[1]),
+      ] as [number, number];
       stroke.prevPoint = this.input.pointerWorld;
 
-      this.renderStroke(start, end);
+      const intersectedA = this.getIntersectedTileSprites(start);
+      const intersectedB = this.getIntersectedTileSprites(end);
 
-      // for (const sprite of sprites) {
-      //   const tileEntity = this.getTileEntity(sprite);
-      //   if (tileEntity) {
-      //     const tile = tileEntity.write(comps.Tile);
-      //     tile.strokeEntity = strokeEntity;
-      //   }
-      // }
+      // get union of A and B
+      const tilesSprites = intersectedA
+        .concat(intersectedB)
+        .filter((tile, index, self) => index === self.findIndex((t) => t === tile));
 
-      this.emitter.emit('draw-outgoing', {
-        startX: start[0],
-        startY: start[1],
-        endX: end[0],
-        endY: end[1],
-      });
+      for (const tileSprite of tilesSprites) {
+        const tileEntity = this.getTileEntity(tileSprite);
+        if (!tileEntity) continue;
+
+        const tile = tileEntity.write(comps.Tile);
+        tile.strokeEntity = strokeEntity;
+
+        const segment = {
+          tileX: tile.index[0],
+          tileY: tile.index[1],
+          startX: start[0],
+          startY: start[1],
+          endX: end[0],
+          endY: end[1],
+        };
+
+        this.brushInstance?.draw(
+          [segment.startX, segment.startY],
+          [segment.endX, segment.endY],
+          tileSprite,
+        );
+        this.emitter.emit('draw-outgoing', segment);
+      }
     }
 
     // delete strokes on pointer up
@@ -188,7 +175,7 @@ class SketchStrokeHandler extends SketchBase {
         deleteEntity(strokeEntity);
       }
 
-      this.brushInstance?.reset();
+      this.brushInstance?.onStrokeEnd();
     }
   }
 }

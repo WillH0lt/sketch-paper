@@ -3,12 +3,12 @@ import * as PIXI from 'pixi.js';
 import BaseBrush from '../BaseBrush.js';
 import { CrayonShader } from './CrayonShader.js';
 
-const transform = new PIXI.Matrix();
-
 class CrayonBrush extends BaseBrush {
   private lastPosition: [number, number] | null = null;
 
   private shader: CrayonShader | null = null;
+
+  private readonly transform = new PIXI.Matrix();
 
   public async init(): Promise<void> {
     PIXI.Assets.add([
@@ -43,7 +43,11 @@ class CrayonBrush extends BaseBrush {
     this.lastPosition = null;
   }
 
-  public draw(pointA: [number, number], pointB: [number, number], target: PIXI.Texture): void {
+  public draw(
+    pointA: [number, number],
+    pointB: [number, number],
+    surface: PIXI.Sprite | PIXI.Mesh,
+  ): void {
     if (!this.brush || !this.shader) return;
 
     const size = this.shader.getBrushSize();
@@ -76,14 +80,14 @@ class CrayonBrush extends BaseBrush {
       this.shader.setPosition([x, y]);
       this.lastPosition = [x, y];
 
-      transform
+      this.transform
         .identity()
         .scale(size, size)
-        .translate(x - size / 2, y - size / 2);
+        .translate(x - surface.position.x - size / 2, y - surface.position.y - size / 2);
 
       this.app.renderer.render({
-        transform,
-        target,
+        transform: this.transform,
+        target: surface.texture,
         container: this.brush,
         clear: false,
       });

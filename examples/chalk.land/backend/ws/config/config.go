@@ -9,7 +9,7 @@ import (
 var config Config
 
 type Config struct {
-	Port          string `default:"8086"`
+	Port          string `default:"8087"`
 	Debug         bool   `default:"true"`
 	RedisPort     int    `default:"6379" split_words:"true"`
 	RedisHost     string `default:"localhost" split_words:"true"`

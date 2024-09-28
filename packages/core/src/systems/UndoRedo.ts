@@ -4,7 +4,7 @@ import * as jsondiffpatch from 'jsondiffpatch';
 
 import * as comps from '../components/index.js';
 import BaseSystem from './Base.js';
-import { waitForPromise } from './common.js';
+import { getTileImageUrl, waitForPromise } from './common.js';
 
 const jsonDiffPatchInstance = jsondiffpatch.create();
 
@@ -17,6 +17,8 @@ class UndoRedo extends BaseSystem {
   private readonly snapshots = this.query((q) =>
     q.added.and.current.with(comps.Snapshot).write.orderBy((s) => -s.ordinal),
   );
+
+  private readonly settings = this.singleton.read(comps.Settings);
 
   private readonly undoStack = this.query((q) =>
     q.current
@@ -150,9 +152,12 @@ class UndoRedo extends BaseSystem {
       } else if (diffField.length === 3) {
         // a value was deleted, i.e. it had a value and is now undefined
         const image = diffField[0];
-        if (image !== '') {
+        if (!image.includes(this.settings.baseUrl)) {
           const tileSource = tileSourceEntity.write(comps.TileSource);
-          tileSource.image = '';
+          const tile = tileSource.tiles[0].read(comps.Tile);
+          const x = tile.position[0] / this.settings.tileWidth;
+          const y = tile.position[1] / this.settings.tileHeight;
+          tileSource.image = getTileImageUrl(this.settings.baseUrl, x, y);
         }
       }
     }

@@ -1,7 +1,8 @@
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { Viewport } from 'pixi-viewport';
 import * as PIXI from 'pixi.js';
 
-import CrayonBrush from './brushes/crayon/CrayonBrush.js';
+import { CrayonBrush } from './brushes/index.js';
 
 async function setupSketchCanvas(element: HTMLElement): Promise<void> {
   // ===========================================================
@@ -23,6 +24,9 @@ async function setupSketchCanvas(element: HTMLElement): Promise<void> {
   const height = app.canvas.clientHeight;
 
   app.renderer.resize(width, height);
+
+  // ===========================================================
+  // create Viewport
 
   const viewport = new Viewport({
     events: app.renderer.events,
@@ -47,17 +51,17 @@ async function setupSketchCanvas(element: HTMLElement): Promise<void> {
     height,
   });
 
-  //
-  const white = new PIXI.Sprite(PIXI.Texture.WHITE);
-  white.width = texture.width;
-  white.height = texture.height;
+  // //
+  // const white = new PIXI.Sprite(PIXI.Texture.WHITE);
+  // white.width = texture.width;
+  // white.height = texture.height;
 
-  app.renderer.render({
-    container: white,
-    target: texture,
-    clear: true,
-  });
-  //
+  // app.renderer.render({
+  //   container: white,
+  //   target: texture,
+  //   clear: true,
+  // });
+  // //
 
   const sprite = new PIXI.Sprite(texture);
   viewport.addChild(sprite);
@@ -86,7 +90,7 @@ async function setupSketchCanvas(element: HTMLElement): Promise<void> {
       return;
     }
 
-    brush.draw([last.x, last.y], [curr.x, curr.y], texture);
+    brush.draw([last.x, last.y], [curr.x, curr.y], sprite);
     last = curr;
   });
 

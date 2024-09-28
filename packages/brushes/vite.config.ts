@@ -1,17 +1,23 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
+import peerDepsExternal from 'rollup-plugin-peer-deps-external';
 import { defineConfig } from 'vite';
-// eslint-disable-next-line import/no-extraneous-dependencies
+import dts from 'vite-plugin-dts';
 import glsl from 'vite-plugin-glsl';
 
 export default defineConfig({
-  plugins: [glsl()],
-  // build: {
-  //   lib: {
-  //     entry: 'src/sketchy-draw.ts',
-  //     formats: ['es'],
-  //   },
-  //   rollupOptions: {
-  //     external: /^lit/,
-  //   },
-  // },
+  plugins: [
+    glsl(),
+    dts({
+      entryRoot: 'src/brushes',
+      insertTypesEntry: true,
+    }),
+  ],
+  build: {
+    lib: {
+      entry: 'src/brushes/index.ts',
+      formats: ['es'],
+    },
+    rollupOptions: {
+      plugins: [peerDepsExternal()],
+    },
+  },
 });

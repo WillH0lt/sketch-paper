@@ -4,11 +4,13 @@ import type BaseShader from './BaseShader.js';
 const SCALE = 1000;
 
 abstract class BaseBrush {
-  public app: PIXI.Application;
-
   public color: [number, number, number, number] = [0, 0, 0, 0];
 
-  public brush: PIXI.Mesh | null = null;
+  public size = 0;
+
+  protected brush: PIXI.Mesh | null = null;
+
+  protected app: PIXI.Application;
 
   public constructor(app: PIXI.Application) {
     this.app = app;
@@ -40,10 +42,12 @@ abstract class BaseBrush {
     this.brush = brush as PIXI.Mesh;
   }
 
+  public abstract init(): Promise<void>;
+
   public abstract draw(
     pointA: [number, number],
     pointB: [number, number],
-    target: PIXI.Texture,
+    surface: PIXI.Sprite | PIXI.Mesh,
   ): void;
 }
 

@@ -27,26 +27,21 @@ export interface Settings {
   // tileCountY: number;
   tileWidth: number;
   tileHeight: number;
-  assetsPath: string;
+  baseUrl: string;
   baseColor: string;
+}
+
+export interface DrawSegment {
+  tileX: number;
+  tileY: number;
+  startX: number;
+  startY: number;
+  endX: number;
+  endY: number;
 }
 
 export interface Events extends EventMap {
   updateBrush: [Brush];
-  'draw-outgoing': [
-    {
-      startX: number;
-      startY: number;
-      endX: number;
-      endY: number;
-    },
-  ];
-  'draw-incoming': [
-    {
-      startX: number;
-      startY: number;
-      endX: number;
-      endY: number;
-    },
-  ];
+  'draw-outgoing': [DrawSegment];
+  'draw-incoming': [DrawSegment];
 }

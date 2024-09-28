@@ -1,0 +1,8 @@
+.swp
+config/production.yaml
+build/
+Godeps/
+!Godeps/Godeps.json
+ws
+dump.rdb
+service-account.json

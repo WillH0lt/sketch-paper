@@ -1,9 +1,6 @@
-export type SdDrawEvent = CustomEvent<{
-  startX: number;
-  startY: number;
-  endX: number;
-  endY: number;
-}>;
+import type { DrawSegment } from '../types.js';
+
+export type SdDrawEvent = CustomEvent<DrawSegment>;
 
 declare global {
   interface GlobalEventHandlersEventMap {

@@ -332,7 +332,7 @@ require (
 	github.com/quic-go/qpack v0.5.1 // indirect
 	github.com/quic-go/quic-go v0.47.0 // indirect
 	github.com/quic-go/webtransport-go v0.8.0 // indirect
-	github.com/redis/go-redis/v9 v9.6.1 // indirect
+	github.com/redis/go-redis/v9 v9.6.1
 	github.com/remyoudompheng/bigfft v0.0.0-20200410134404-eec4a21b6bb0 // indirect
 	github.com/rogpeppe/fastuuid v1.2.0 // indirect
 	github.com/rogpeppe/go-internal v1.10.0 // indirect
@@ -381,6 +381,7 @@ require (
 	github.com/viant/toolbox v0.24.0 // indirect
 	github.com/vmihailenco/msgpack/v5 v5.4.1 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
+	github.com/willH0lt/sketchyDraw/examples/chalk.land/backend/shared v0.0.0
 	github.com/xhit/go-str2duration v1.2.0 // indirect
 	github.com/xhit/go-str2duration/v2 v2.1.0 // indirect
 	github.com/xiang90/probing v0.0.0-20190116061207-43a291ad63a2 // indirect
@@ -462,3 +463,5 @@ require (
 	sourcegraph.com/sourcegraph/go-diff v0.5.0 // indirect
 	sourcegraph.com/sqs/pbtypes v0.0.0-20180604144634-d3ebe8f20ae4 // indirect
 )
+
+replace github.com/willH0lt/sketchyDraw/examples/chalk.land/backend/shared v0.0.0 => ../shared

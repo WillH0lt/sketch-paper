@@ -1,9 +1,8 @@
 import type { Entity } from '@lastolivegames/becsy';
 import { co } from '@lastolivegames/becsy';
 import type { Viewport } from 'pixi-viewport';
-import type * as PIXI from 'pixi.js';
+import * as PIXI from 'pixi.js';
 
-import type PixiTile from '../PixiTile.js';
 import * as comps from '../components/index.js';
 import BaseSystem from './Base.js';
 import { waitForPromise } from './common.js';
@@ -30,25 +29,25 @@ class SketchBase extends BaseSystem {
 
     this.app.stop();
 
-    const pixiTiles = tileEntities.map((tileEntity) => this.getPixiTile(tileEntity));
-    for (const pixiTile of pixiTiles) {
-      if (!pixiTile) continue;
+    const tileSprites = tileEntities.map((tileEntity) => this.getTileSprite(tileEntity));
+    for (const tileSprite of tileSprites) {
+      if (!tileSprite) continue;
 
       const url = (yield* waitForPromise(
-        this.app.renderer.extract.base64(pixiTile.texture),
+        this.app.renderer.extract.base64(tileSprite.texture),
       )) as string;
       const res = (yield* waitForPromise(fetch(url))) as Response;
       const img = (yield* waitForPromise(res.blob())) as Blob;
       const blob = new Blob([img], { type: 'image/png' });
       const blobUrl = URL.createObjectURL(blob);
 
-      const tileEntity = this.getTileEntity(pixiTile);
+      const tileEntity = this.getTileEntity(tileSprite);
       if (!tileEntity) continue;
 
       const tileSource = tileEntity.read(comps.Tile).source.write(comps.TileSource);
       tileSource.image = blobUrl;
 
-      pixiTile.texture.source.label = blobUrl;
+      tileSprite.texture.source.label = blobUrl;
     }
 
     this.app.start();
@@ -56,15 +55,17 @@ class SketchBase extends BaseSystem {
     this.createSnapshot();
   }
 
-  protected getPixiTile(tileEntity: Entity): PixiTile | null {
+  protected getTileSprite(tileEntity: Entity): PIXI.Sprite | null {
     const { label } = tileEntity.read(comps.Tile).source.read(comps.TileSource);
-    return this.viewport.children.find((child) => child.label === label) as PixiTile;
+    const sprite = this.viewport.children.find((child) => child.label === label);
+    if (sprite instanceof PIXI.Sprite) return sprite;
+    return null;
   }
 
-  protected getTileEntity(pixiTile: PIXI.Container): Entity | null {
+  protected getTileEntity(tileSprite: PIXI.Sprite): Entity | null {
     for (const tileEntity of this._tiles.current) {
       const { label } = tileEntity.read(comps.Tile).source.read(comps.TileSource);
-      if (pixiTile.label === label) {
+      if (tileSprite.label === label) {
         return tileEntity;
       }
     }
@@ -72,13 +73,13 @@ class SketchBase extends BaseSystem {
     return null;
   }
 
-  protected getIntersectedTiles(point: [number, number], tolerance = 40): PixiTile[] {
+  protected getIntersectedTileSprites(point: [number, number], tolerance = 40): PIXI.Sprite[] {
     const x = point[0];
     const y = point[1];
     const w = this._settings.tileWidth;
     const h = this._settings.tileHeight;
 
-    const intersected: PixiTile[] = [];
+    const intersected: PIXI.Sprite[] = [];
     this._tiles.current.forEach((tileEntity) => {
       const tile = tileEntity.read(comps.Tile);
 
@@ -88,8 +89,8 @@ class SketchBase extends BaseSystem {
         x <= tile.position[0] + w + tolerance &&
         x >= tile.position[0] - tolerance
       ) {
-        const pixiTile = this.getPixiTile(tileEntity);
-        if (pixiTile) intersected.push(pixiTile);
+        const tileSprite = this.getTileSprite(tileEntity);
+        if (tileSprite) intersected.push(tileSprite);
       }
     });
 
