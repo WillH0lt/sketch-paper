@@ -11,15 +11,18 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"time"
 
 	"github.com/chromedp/cdproto/runtime"
 	"github.com/chromedp/chromedp"
 	"github.com/disintegration/imaging"
+	"github.com/willH0lt/sketchyDraw/examples/chalk.land/backend/images/chrome"
 	"github.com/willH0lt/sketchyDraw/examples/chalk.land/backend/shared/models"
 )
 
-func makeScreenshot(ctx context.Context, img *image.RGBA, segments []*models.DrawSegment) error {
+func makeScreenshot(img *image.RGBA, segments []*models.DrawSegment) error {
 
+	ctx := chrome.GetChromeContext()
 	ctx1, cancel := chromedp.NewContext(ctx)
 	defer cancel()
 
@@ -50,9 +53,18 @@ func makeScreenshot(ctx context.Context, img *image.RGBA, segments []*models.Dra
 	positionX := int(segments[0].TileX) * w
 	positionY := int(segments[0].TileY) * h
 
+	t1 := time.Now()
 	if err := chromedp.Run(ctx1, chromedp.Tasks{
 		chromedp.EmulateViewport(int64(w+2*viewportPadding), int64(h+2*viewportPadding)),
-		chromedp.Navigate(filepath.Join(cwd, "screenshotView", "dist", "index.html")),
+		chromedp.ActionFunc(func(ctx context.Context) error {
+			fmt.Printf("time step 1: %v\n", time.Since(t1))
+			return nil
+		}),
+		chromedp.Navigate("file://" + filepath.Join(cwd, "screenshotView", "dist", "index.html")),
+		chromedp.ActionFunc(func(ctx context.Context) error {
+			fmt.Printf("time step 2: %v\n", time.Since(t1))
+			return nil
+		}),
 		chromedp.Evaluate(`
 		(async () => {
 			const canvas = window.SketchyDrawCanvas;
@@ -62,10 +74,19 @@ func makeScreenshot(ctx context.Context, img *image.RGBA, segments []*models.Dra
 		})();`, &res, func(p *runtime.EvaluateParams) *runtime.EvaluateParams {
 			return p.WithAwaitPromise(true)
 		}),
+		chromedp.ActionFunc(func(ctx context.Context) error {
+			fmt.Printf("time step 3: %v\n", time.Since(t1))
+			return nil
+		}),
 		chromedp.CaptureScreenshot(&buf),
+		chromedp.ActionFunc(func(ctx context.Context) error {
+			fmt.Printf("time step 4: %v\n", time.Since(t1))
+			return nil
+		}),
 	}); err != nil {
 		return fmt.Errorf("error running chromedp: %w", err)
 	}
+	fmt.Println("Time taken to make screenshot: ", time.Since(t1))
 
 	screenshot, _, err := image.Decode(bytes.NewReader(buf))
 	if err != nil {

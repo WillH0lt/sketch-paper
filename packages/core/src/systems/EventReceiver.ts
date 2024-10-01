@@ -25,8 +25,8 @@ class EventReceiver extends BaseSystem {
     const handleUpdateBrushFn = (payload: Brush): void => {
       this.handleUpdateBrushCoroutine(payload);
     };
-    this.emitter.on('updateBrush', handleUpdateBrushFn);
-    this.onDestroyCallbacks.push(() => this.emitter.off('updateBrush', handleUpdateBrushFn));
+    this.emitter.on('update-brush', handleUpdateBrushFn);
+    this.onDestroyCallbacks.push(() => this.emitter.off('update-brush', handleUpdateBrushFn));
   }
 }
 

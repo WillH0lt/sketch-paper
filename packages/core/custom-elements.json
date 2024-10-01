@@ -2,26 +2,69 @@
   "version": "experimental",
   "tags": [
     {
-      "name": "sketch-paper",
-      "path": "./src\\lib\\sketch-paper.ts",
+      "name": "sketchy-draw-canvas",
+      "path": "./src\\elements\\canvas\\sketchyDrawCanvas.ts",
+      "properties": [
+        {
+          "name": "styles",
+          "type": "CSSResult",
+          "default": "\"css`\\r\\n    canvas {\\r\\n      display: block;\\r\\n      vertical-align: middle;\\r\\n    }\\r\\n  `\""
+        },
+        {
+          "name": "emitter",
+          "type": "Emitter<Events>",
+          "default": "\"new Emitter<Events>()\""
+        }
+      ]
+    },
+    {
+      "name": "bottom-zoom",
+      "path": "./src\\elements_old\\BottomZoom.ts",
       "attributes": [
         {
-          "name": "who",
-          "type": "string",
-          "default": "\"world\""
+          "name": "zoom",
+          "type": "number",
+          "default": "1"
+        },
+        {
+          "name": "min-zoom",
+          "type": "number",
+          "default": "0.1"
+        },
+        {
+          "name": "max-zoom",
+          "type": "number",
+          "default": "10"
         }
       ],
       "properties": [
         {
           "name": "styles",
           "type": "CSSResult",
-          "default": "\"css`\\n    :host {\\n      font-size: 2em;\\n    }\\n\\n    .who {\\n      color: var(--hello-world-who-color, DodgerBlue);\\n    }\\n  `\""
+          "default": "\"css`\\n    .slider {\\n      -webkit-appearance: none;\\n      width: 4px;\\n      height: 25px;\\n      background: var(--gray-medium);\\n      outline: none;\\n      opacity: 0.7;\\n      -webkit-transition: 0.2s;\\n      transition: opacity 0.2s;\\n    }\\n\\n    .slider:hover {\\n      opacity: 1;\\n    }\\n\\n    .slider::-webkit-slider-thumb {\\n      -webkit-appearance: none;\\n      appearance: none;\\n      width: 15px;\\n      height: 15px;\\n      border-radius: 9999px;\\n      background: var(--gray-dark);\\n      cursor: pointer;\\n    }\\n\\n    .slider::-webkit-slider-thumb:hover {\\n      background: var(--primary-color);\\n    }\\n\\n    .slider::-moz-range-thumb {\\n      width: 15px;\\n      height: 15px;\\n      border-radius: 9999px;\\n      background: var(--gray-dark);\\n      cursor: pointer;\\n    }\\n\\n    .slider::-moz-range-thumb:hover {\\n      background: var(--primary-color);\\n    }\\n  `\""
         },
         {
-          "name": "who",
-          "attribute": "who",
-          "type": "string",
-          "default": "\"world\""
+          "name": "zoom",
+          "attribute": "zoom",
+          "type": "number",
+          "default": "1"
+        },
+        {
+          "name": "minZoom",
+          "attribute": "min-zoom",
+          "type": "number",
+          "default": "0.1"
+        },
+        {
+          "name": "maxZoom",
+          "attribute": "max-zoom",
+          "type": "number",
+          "default": "10"
+        }
+      ],
+      "events": [
+        {
+          "name": "update-zoom"
         }
       ]
     }

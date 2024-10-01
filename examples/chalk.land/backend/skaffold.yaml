@@ -1,0 +1,69 @@
+apiVersion: skaffold/v3
+kind: Config
+metadata:
+  name: chalkland
+build:
+  artifacts:
+    - image: gcr.io/chalkland/chalkland-ws
+      docker:
+        dockerfile: ws/Dockerfile
+    - image: gcr.io/chalkland/chalkland-cleaner
+      docker:
+        dockerfile: cleaner/Dockerfile
+    - image: gcr.io/chalkland/chalkland-images
+      docker:
+        dockerfile: images/Dockerfile
+manifests:
+  kustomize:
+    paths:
+      - k8s/overlays/dev
+deploy:
+  kubeContext: minikube
+  kubectl:
+    defaultNamespace: chalkland
+  helm:
+    releases:
+      - name: redis
+        remoteChart: oci://registry-1.docker.io/bitnamicharts/redis
+        namespace: chalkland
+        createNamespace: true
+        setValues:
+          architecture: standalone
+          auth.enabled: false
+profiles:
+  - name: microk8s
+    deploy:
+      kubeContext: microk8s
+    build:
+      local:
+        push: true
+    patches:
+      - op: replace
+        path: /build/artifacts/0/image
+        value: localhost:32000/chalkland-ws
+      - op: replace
+        path: /build/artifacts/1/image
+        value: localhost:32000/chalkland-cleaner
+      - op: replace
+        path: /build/artifacts/2/image
+        value: localhost:32000/chalkland-images
+      - op: replace
+        path: /manifests/kustomize/paths
+        value:
+          - k8s/overlays/microk8s
+# Important! When you're using minikube run `minikube tunnel` to expose the services.
+
+# use dev context
+# kubectl config use-context minikube
+
+# use microk8s context
+# kubectl config use-context microk8s
+
+# Minikube create service account secret
+# kubectl create secret generic chalkland-service-account --from-file=./service-account.json --namespace chalkland
+
+# deploy
+# skaffold run -p microk8s
+
+# Run cron job manually
+# kubectl create job --from=cronjob/chalkland-cleaner chalkland-cleaner-000

@@ -4,14 +4,30 @@
       ref="sketchyDrawCanvasRef"
       @sd-move="handleMove"
       @sd-draw="handleDraw"
+      :min-zoom="0.25"
+      :max-zoom="10"
+      :tile-width="2048"
+      :tile-height="2048"
+      :tile-count-x="0"
+      :tile-count-y="0"
+      base-color="#C2BCB0"
+      base-url="http://localhost:8086/v1/image"
+      background-color="#FFFFFF"
     ></sketchy-draw-canvas>
     <div
-      class="absolute bottom-1 left-2 pointer-events-none text-lg text-white"
+      class="absolute bottom-1 left-2 pointer-events-none text-2xl text-white"
       v-if="peopleHere > 0"
     >
       people here: {{ peopleHere }}
     </div>
-    <div class="absolute bottom-1 right-2 pointer-events-none text-lg text-white">
+
+    <div class="absolute flex w-full bottom-2 justify-center overflow-hidden pointer-events-none">
+      <div class="flex items-end h-40 w-full max-w-[400px]">
+        <palette class="w-full h-20 pointer-events-auto cursor-default"></palette>
+      </div>
+    </div>
+
+    <div class="absolute bottom-1 right-2 pointer-events-none text-2xl text-white">
       ({{ Math.round(x) }}, {{ Math.round(-1 * y) }})
     </div>
   </div>
@@ -32,6 +48,9 @@ const y = ref(0);
 const socket = import.meta.client
   ? io('http://localhost:8087', {
       transports: ['websocket'],
+      perMessageDeflate: {
+        threshold: 0,
+      },
     })
   : null;
 
@@ -42,6 +61,7 @@ function handleMove(event: SdMoveEvent) {
 
 function handleDraw(event: SdDrawEvent) {
   socket?.emit('draw', compress(event.detail));
+  socket?.emit('draw', event.detail);
 }
 
 socket?.on('draw', (data: string) => {

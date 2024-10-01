@@ -17,6 +17,8 @@ type ImageController struct{}
 func (h ImageController) Retrieve(c *gin.Context) {
 	name := c.Param("name")
 
+	fmt.Printf("Retrieving image %s\n", name)
+
 	img, err := storage.GetImage(c, name)
 	if err == gcp.ErrObjectNotExist {
 		img = imageTools.CreateBlank()
@@ -24,6 +26,8 @@ func (h ImageController) Retrieve(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to fetch image: %v", err)})
 		return
 	}
+
+	fmt.Printf("Retrieved image %s\n", name)
 
 	updated, err := imageTools.Augment(c, redis.GetRedisClient(), img, name)
 	if err != nil {
@@ -40,5 +44,8 @@ func (h ImageController) Retrieve(c *gin.Context) {
 		}()
 	}
 
-	png.Encode(c.Writer, img)
+	if err := png.Encode(c.Writer, img); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to encode image: %v", err)})
+		return
+	}
 }

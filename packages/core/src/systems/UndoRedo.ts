@@ -95,6 +95,8 @@ class UndoRedo extends BaseSystem {
   }
 
   public execute(): void {
+    if (!this.settings.allowUndo) return;
+
     if (this.snapshots.added.length) {
       this.saveSnapshot(this.snapshots.added[0]);
       for (const redoable of this.redoStack.current) {

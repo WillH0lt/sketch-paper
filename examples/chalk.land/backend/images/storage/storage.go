@@ -26,11 +26,9 @@ package storage
 import (
 	"bytes"
 	"context"
-	"errors"
 	"fmt"
 	"image"
 	"image/png"
-	"os"
 
 	"cloud.google.com/go/storage"
 	"github.com/willH0lt/sketchyDraw/examples/chalk.land/backend/images/config"
@@ -41,22 +39,15 @@ var client *storage.Client
 
 func Init() *storage.Client {
 
-	c := config.GetConfig()
+	conf := config.GetConfig()
 
-	if _, err := os.Stat(c.ServiceAccount); err == nil {
-		opt := option.WithCredentialsFile(c.ServiceAccount)
-		client, err = storage.NewClient(context.Background(), opt)
-		if err != nil {
-			panic(fmt.Sprintf("failed to create storage client: %v", err))
-		}
-	} else if errors.Is(err, os.ErrNotExist) {
-		client, err = storage.NewClient(context.Background())
-		if err != nil {
-			panic(fmt.Sprintf("failed to create storage client: %v", err))
-		}
-	} else {
+	opt := option.WithCredentialsFile(conf.ServiceAccount)
+	c, err := storage.NewClient(context.Background(), opt)
+	if err != nil {
 		panic(fmt.Sprintf("failed to create storage client: %v", err))
 	}
+
+	client = c
 
 	return client
 }
@@ -106,39 +97,3 @@ func GetImage(ctx context.Context, imageName string) (*image.RGBA, error) {
 
 	return img.(*image.RGBA), nil
 }
-
-// func (s *Storage) SetMetadata(ctx context.Context, path string, metadata map[string]string) error {
-// 	bucket := s.client.Bucket(s.Bucket)
-// 	obj := bucket.Object(path)
-// 	objectAttrsToUpdate := storage.ObjectAttrsToUpdate{
-// 		Metadata: metadata,
-// 	}
-// 	if _, err := obj.Update(ctx, objectAttrsToUpdate); err != nil {
-// 		return err
-// 	}
-
-// 	return nil
-// }
-
-// func (s *Storage) Exists(path string) (bool, error) {
-// 	bucket := s.client.Bucket(s.Bucket)
-
-// 	if reader, err := bucket.Object(path).NewReader(s.ctx); err != nil {
-// 		if err == storage.ErrObjectNotExist {
-// 			return false, nil
-// 		}
-// 		return false, err
-// 	} else {
-// 		reader.Close()
-// 		return true, nil
-// 	}
-// }
-
-// func (s *Storage) Close() {
-// 	s.client.Close()
-// }
-
-// // GetStorage returns the singleton storage instance
-// func GetStorage() *Storage {
-// 	return &storageInstance
-// }

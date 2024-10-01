@@ -14,6 +14,11 @@ type DrawSegment struct {
 	StartY int32 `json:"startY"`
 	EndX   int32 `json:"endX"`
 	EndY   int32 `json:"endY"`
+	Red    int32 `json:"red"`
+	Green  int32 `json:"green"`
+	Blue   int32 `json:"blue"`
+	Alpha  int32 `json:"alpha"`
+	Size   int32 `json:"size"`
 }
 
 func NewDrawSegment(message string) (*DrawSegment, error) {
@@ -55,5 +60,10 @@ func NewDrawSegment(message string) (*DrawSegment, error) {
 		StartY: data[3],
 		EndX:   data[4],
 		EndY:   data[5],
+		Red:    data[6],
+		Green:  data[7],
+		Blue:   data[8],
+		Alpha:  data[9],
+		Size:   data[10],
 	}, nil
 }

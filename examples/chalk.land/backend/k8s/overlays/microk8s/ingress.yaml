@@ -1,0 +1,49 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: chalkland-ws-ingress
+  namespace: chalkland
+  annotations:
+    kubernetes.io/ingress.class: public
+    cert-manager.io/cluster-issuer: lets-encrypt
+spec:
+  tls:
+    - hosts:
+        - ws.chalk.land
+      secretName: api-ingress-tls
+  rules:
+    - host: ws.chalk.land
+      http:
+        paths:
+          - backend:
+              service:
+                name: chalkland-ws
+                port:
+                  number: 80
+            path: /
+            pathType: ImplementationSpecific
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: chalkland-images-ingress
+  namespace: chalkland
+  annotations:
+    kubernetes.io/ingress.class: public
+    cert-manager.io/cluster-issuer: lets-encrypt
+spec:
+  tls:
+    - hosts:
+        - images.chalk.land
+      secretName: images-ingress-tls
+  rules:
+    - host: images.chalk.land
+      http:
+        paths:
+          - backend:
+              service:
+                name: chalkland-images
+                port:
+                  number: 80
+            path: /
+            pathType: ImplementationSpecific

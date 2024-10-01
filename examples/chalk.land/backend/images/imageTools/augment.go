@@ -39,7 +39,10 @@ func Augment(ctx context.Context, rdb *redis.Client, img *image.RGBA, name strin
 
 	wp := workerpool.GetWorkerPool()
 	wp.SubmitWait(func() {
-		makeScreenshot(ctx, img, drawSegments)
+		if err := makeScreenshot(img, drawSegments); err != nil {
+			fmt.Printf("Failed to augment image %s: %v\n", name, err)
+		}
+		fmt.Printf("Augmented image %s with %d draw segments\n", name, len(drawSegments))
 	})
 
 	if _, err := rdb.LTrim(ctx, label, int64(len(drawStrs)), -1).Result(); err != nil {

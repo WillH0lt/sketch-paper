@@ -23,12 +23,14 @@ export interface Brush {
 export interface Settings {
   minZoom: number;
   maxZoom: number;
-  // tileCountX: number;
-  // tileCountY: number;
+  tileCountX: number;
+  tileCountY: number;
   tileWidth: number;
   tileHeight: number;
   baseUrl: string;
   baseColor: string;
+  backgroundColor: string;
+  allowUndo: boolean;
 }
 
 export interface DrawSegment {
@@ -38,10 +40,15 @@ export interface DrawSegment {
   startY: number;
   endX: number;
   endY: number;
+  red: number;
+  green: number;
+  blue: number;
+  alpha: number;
+  size: number;
 }
 
 export interface Events extends EventMap {
-  updateBrush: [Brush];
+  'update-brush': [Brush];
   'draw-outgoing': [DrawSegment];
   'draw-incoming': [DrawSegment];
 }

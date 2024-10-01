@@ -22,6 +22,8 @@ class SketchStrokeHandler extends SketchBase {
 
   private readonly brush = this.singleton.read(comps.Brush);
 
+  private readonly settings = this.singleton.read(comps.Settings);
+
   private readonly brushes = this.query((q) => q.addedOrChanged.with(comps.Brush).trackWrites);
 
   private readonly strokes = this.query((q) => q.current.with(comps.Stroke).write);
@@ -125,6 +127,8 @@ class SketchStrokeHandler extends SketchBase {
 
     // render strokes
     for (const strokeEntity of this.strokes.current) {
+      if (!this.brushInstance) continue;
+
       const stroke = strokeEntity.write(comps.Stroke);
 
       const start = [stroke.prevPoint[0], stroke.prevPoint[1]] as [number, number];
@@ -134,8 +138,8 @@ class SketchStrokeHandler extends SketchBase {
       ] as [number, number];
       stroke.prevPoint = this.input.pointerWorld;
 
-      const intersectedA = this.getIntersectedTileSprites(start);
-      const intersectedB = this.getIntersectedTileSprites(end);
+      const intersectedA = this.getIntersectedTileSprites(start, (1.4 * this.brush.size) / 2);
+      const intersectedB = this.getIntersectedTileSprites(end, (1.4 * this.brush.size) / 2);
 
       // get union of A and B
       const tilesSprites = intersectedA
@@ -156,9 +160,14 @@ class SketchStrokeHandler extends SketchBase {
           startY: start[1],
           endX: end[0],
           endY: end[1],
+          red: this.brushInstance.color[0],
+          green: this.brushInstance.color[1],
+          blue: this.brushInstance.color[2],
+          alpha: this.brushInstance.color[3],
+          size: this.brushInstance.size,
         };
 
-        this.brushInstance?.draw(
+        this.brushInstance.draw(
           [segment.startX, segment.startY],
           [segment.endX, segment.endY],
           tileSprite,
@@ -177,6 +186,30 @@ class SketchStrokeHandler extends SketchBase {
 
       this.brushInstance?.onStrokeEnd();
     }
+  }
+
+  protected getIntersectedTileSprites(point: [number, number], tolerance: number): PIXI.Sprite[] {
+    const x = point[0];
+    const y = point[1];
+    const w = this.settings.tileWidth;
+    const h = this.settings.tileHeight;
+
+    const intersected: PIXI.Sprite[] = [];
+    this.tiles.current.forEach((tileEntity) => {
+      const tile = tileEntity.read(comps.Tile);
+
+      if (
+        y <= tile.position[1] + h + tolerance &&
+        y >= tile.position[1] - tolerance &&
+        x <= tile.position[0] + w + tolerance &&
+        x >= tile.position[0] - tolerance
+      ) {
+        const tileSprite = this.getTileSprite(tileEntity);
+        if (tileSprite) intersected.push(tileSprite);
+      }
+    });
+
+    return intersected;
   }
 }
 

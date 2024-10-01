@@ -14,7 +14,6 @@ type Config struct {
 	TileHeight     int          `default:"2048" split_words:"true"`
 	RedisPort      int          `default:"6379" split_words:"true"`
 	RedisHost      string       `default:"localhost" split_words:"true"`
-	RedisPassword  string       `default:"" split_words:"true"`
 	BucketName     string       `default:"sketch-paper-public" split_words:"true"`
 	ServiceAccount string       `default:"./service-account.json" split_words:"true"`
 }
@@ -22,7 +21,7 @@ type Config struct {
 func GetConfig() Config {
 
 	var c Config
-	if err := envconfig.Process("ws", &c); err != nil {
+	if err := envconfig.Process("images", &c); err != nil {
 		log.Fatal("Failed to read environment variables")
 	}
 

@@ -20,6 +20,9 @@ func Init() {
 	c.SetPingTimeout(200 * time.Millisecond)
 	c.SetMaxHttpBufferSize(1000000)
 	c.SetConnectTimeout(1000 * time.Millisecond)
+	c.SetPerMessageDeflate(&types.PerMessageDeflate{
+		Threshold: 0,
+	})
 	c.SetCors(&types.Cors{
 		Origin:      "*",
 		Credentials: true,

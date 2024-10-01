@@ -126,9 +126,14 @@ class SketchTileHandler extends SketchBase {
       (tileEntity) => tileEntity.read(comps.Tile).loading,
     );
 
-    if (loadingTileEntities.length) return;
+    if (loadingTileEntities.length > 3) return;
 
-    const { tileWidth, tileHeight } = this.settings;
+    const { tileCountX, tileCountY, tileWidth, tileHeight } = this.settings;
+
+    const minX = tileCountX === 0 ? -Infinity : 0;
+    const minY = tileCountY === 0 ? Infinity : tileCountY - 1;
+    const maxX = tileCountX === 0 ? Infinity : tileCountX - 1;
+    const maxY = tileCountY === 0 ? -Infinity : 0;
 
     // get tiles in view (note that top < bottom)
     const left = Math.floor(this.viewport.left / tileWidth);
@@ -138,6 +143,8 @@ class SketchTileHandler extends SketchBase {
 
     for (let x = left; x <= right; x++) {
       for (let y = top; y <= bottom; y++) {
+        if (x < minX || x > maxX || y > minY || y < maxY) continue;
+
         const positionX = x * tileWidth;
         const positionY = y * tileHeight;
 

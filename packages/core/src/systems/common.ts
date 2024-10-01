@@ -47,5 +47,8 @@ export function hexToNumber(hex: string): number {
 }
 
 export function getTileImageUrl(baseUrl: string, tileX: number, tileY: number): string {
+  if (baseUrl === '') {
+    return '';
+  }
   return `${baseUrl}/${tileX}_${tileY}.png`;
 }

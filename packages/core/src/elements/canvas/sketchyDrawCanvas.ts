@@ -9,7 +9,7 @@ import { Emitter } from 'strict-event-emitter';
 import * as comps from '../../components/index.js';
 import { hexToNumber } from '../../systems/common.js';
 import * as sys from '../../systems/index.js';
-import type { DrawSegment, Events, Settings } from '../../types.js';
+import type { Brush, DrawSegment, Events } from '../../types.js';
 import { BrushKindEnum } from '../../types.js';
 import SdBaseElement from '../base/sketchyDrawBase.js';
 
@@ -22,15 +22,50 @@ class SketchyDrawCanvas extends SdBaseElement {
     }
   `;
 
-  @property()
-  private readonly settings: Settings = {
-    minZoom: 0.25,
-    maxZoom: 10,
-    tileWidth: 2048,
-    tileHeight: 2048,
-    baseUrl: 'http://localhost:8086/v1/image',
-    baseColor: '#000000',
-  };
+  // @property()
+  // private readonly settings: Settings = {
+  //   minZoom: 0.25,
+  //   maxZoom: 10,
+  //   tileWidth: 2048,
+  //   tileHeight: 2048,
+  //   tileCountX: 1,
+  //   tileCountY: 1,
+  //   // baseUrl: 'http://localhost:8086/v1/image',
+  //   baseUrl: '',
+  //   baseColor: '#C2BCB0',
+  //   backgroundColor: '#FFFFFF',
+  //   allowUndo: false,
+  // };
+
+  @property({ attribute: 'min-zoom', type: Number })
+  private readonly minZoom = 0.25;
+
+  @property({ attribute: 'max-zoom', type: Number })
+  private readonly maxZoom = 10;
+
+  @property({ attribute: 'tile-width', type: Number })
+  private readonly tileWidth = 2048;
+
+  @property({ attribute: 'tile-height', type: Number })
+  private readonly tileHeight = 2048;
+
+  @property({ attribute: 'tile-count-x', type: Number })
+  private readonly tileCountX = 1;
+
+  @property({ attribute: 'tile-count-y', type: Number })
+  private readonly tileCountY = 1;
+
+  @property({ attribute: 'base-url', type: String })
+  private readonly baseUrl = '';
+
+  @property({ attribute: 'base-color', type: String })
+  private readonly baseColor = '#C2BCB0';
+
+  @property({ attribute: 'background-color', type: String })
+  private readonly backgroundColor = '#FFFFFF';
+
+  @property({ attribute: 'allow-undo', type: Boolean })
+  private readonly allowUndo = false;
 
   @query('#container')
   private readonly container!: HTMLDivElement;
@@ -56,6 +91,10 @@ class SketchyDrawCanvas extends SdBaseElement {
 
   public draw(segment: DrawSegment): void {
     this.emitter.emit('draw-incoming', segment);
+  }
+
+  public updateBrush(brush: Brush): void {
+    this.emitter.emit('update-brush', brush);
   }
 
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
@@ -106,7 +145,7 @@ class SketchyDrawCanvas extends SdBaseElement {
     app.renderer.canvas.style.width = '100%';
     app.renderer.canvas.style.height = '100%';
     this.container.appendChild(app.renderer.canvas);
-    app.renderer.background.color = hexToNumber(this.settings.baseColor);
+    app.renderer.background.color = hexToNumber(this.backgroundColor);
 
     const viewport = new Viewport({
       // screenWidth: this.container.offsetWidth,
@@ -116,16 +155,21 @@ class SketchyDrawCanvas extends SdBaseElement {
       events: app.renderer.events,
     });
 
+    console.log(this.minZoom, this.maxZoom);
+    console.log(typeof this.minZoom, typeof this.maxZoom);
+
     viewport
       .drag({
         mouseButtons: 'right',
       })
       .pinch()
-      .wheel()
+      .wheel({
+        smooth: 8,
+      })
       .decelerate()
       .clampZoom({
-        minScale: this.settings.minZoom,
-        maxScale: this.settings.maxZoom,
+        minScale: this.minZoom,
+        maxScale: this.maxZoom,
       });
     // .clamp({
     //   direction: "all",
@@ -194,7 +238,18 @@ class SketchyDrawCanvas extends SdBaseElement {
     });
 
     world.build((worldSys) => {
-      Object.assign(worldSys.singleton.write(comps.Settings), this.settings);
+      Object.assign(worldSys.singleton.write(comps.Settings), {
+        minZoom: this.minZoom,
+        maxZoom: this.maxZoom,
+        tileWidth: this.tileWidth,
+        tileHeight: this.tileHeight,
+        tileCountX: this.tileCountX,
+        tileCountY: this.tileCountY,
+        baseUrl: this.baseUrl,
+        baseColor: this.baseColor,
+        backgroundColor: this.backgroundColor,
+        allowUndo: this.allowUndo,
+      });
 
       const brush = worldSys.singleton.write(comps.Brush);
       const savedSize = localStorage.getItem('brush-size');
@@ -213,8 +268,8 @@ class SketchyDrawCanvas extends SdBaseElement {
       const zoom = Math.min(window.innerWidth, 1000) / 2000;
       viewport.setZoom(zoom, true);
       viewport.position.set(
-        window.innerWidth / 2 - this.settings.tileWidth / 4,
-        window.innerHeight / 2 - this.settings.tileHeight / 4,
+        window.innerWidth / 2 - this.tileWidth / 4,
+        window.innerHeight / 2 - this.tileHeight / 4,
       );
       // this.zoomContainer?.setAttribute("zoom", zoom.toString());
     });

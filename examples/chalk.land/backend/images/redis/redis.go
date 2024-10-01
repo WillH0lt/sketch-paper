@@ -15,9 +15,8 @@ func Init() *redis.Client {
 	c := config.GetConfig()
 
 	Client = redis.NewClient(&redis.Options{
-		Addr:     fmt.Sprintf("%s:%d", c.RedisHost, c.RedisPort),
-		Password: c.RedisPassword,
-		DB:       0,
+		Addr: fmt.Sprintf("%s:%d", c.RedisHost, c.RedisPort),
+		DB:   0,
 	})
 
 	return Client

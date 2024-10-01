@@ -12,8 +12,6 @@ class SketchBase extends BaseSystem {
 
   protected readonly viewport!: Viewport;
 
-  private readonly _settings = this.singleton.read(comps.Settings);
-
   private readonly _tiles = this.query((q) => q.current.with(comps.Tile).write);
 
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -71,30 +69,6 @@ class SketchBase extends BaseSystem {
     }
 
     return null;
-  }
-
-  protected getIntersectedTileSprites(point: [number, number], tolerance = 40): PIXI.Sprite[] {
-    const x = point[0];
-    const y = point[1];
-    const w = this._settings.tileWidth;
-    const h = this._settings.tileHeight;
-
-    const intersected: PIXI.Sprite[] = [];
-    this._tiles.current.forEach((tileEntity) => {
-      const tile = tileEntity.read(comps.Tile);
-
-      if (
-        y <= tile.position[1] + h + tolerance &&
-        y >= tile.position[1] - tolerance &&
-        x <= tile.position[0] + w + tolerance &&
-        x >= tile.position[0] - tolerance
-      ) {
-        const tileSprite = this.getTileSprite(tileEntity);
-        if (tileSprite) intersected.push(tileSprite);
-      }
-    });
-
-    return intersected;
   }
 }
 
