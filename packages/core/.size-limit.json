@@ -2,6 +2,6 @@
   {
     "gzip": true,
     "limit": "32 kB",
-    "path": "./dist/sketchy-draw.min.js"
+    "path": "./dist/sketch-paper.min.js"
   }
 ]

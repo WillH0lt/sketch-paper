@@ -13,7 +13,7 @@ const isServe = Boolean(process.env.SERVE);
 
 const config = [
   {
-    input: 'artifacts/sketchy-draw.js',
+    input: 'artifacts/sketch-paper.js',
     output: {
       dir: 'dist',
       entryFileNames: '[name].min.js',
@@ -40,8 +40,8 @@ const config = [
         ],
   },
   {
-    input: './artifacts/sketchy-draw.d.ts',
-    output: [{ file: 'dist/sketchy-draw.d.ts', format: 'esm' }],
+    input: './artifacts/sketch-paper.d.ts',
+    output: [{ file: 'dist/sketch-paper.d.ts', format: 'esm' }],
     plugins: [dts()],
   },
 ];

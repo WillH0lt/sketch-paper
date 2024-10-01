@@ -1,5 +1,5 @@
 {
-  "name": "@sketchy-draw/core",
+  "name": "@sketch-paper/core",
   "version": "1.0.0",
   "type": "module",
   "description": "A simple starter hello world web component written in typescript, using lit",
@@ -8,9 +8,9 @@
   "bugs": "https://github.com/fernandopasik/hello-web-components/issues",
   "author": "Fernando Pasik <fernando@pasik.com.ar> (https://fernandopasik.com)",
   "license": "MIT",
-  "main": "dist/sketchy-draw.min.js",
-  "module": "dist/sketchy-draw.min.js",
-  "types": "dist/sketchy-draw.d.ts",
+  "main": "dist/sketch-paper.min.js",
+  "module": "dist/sketch-paper.min.js",
+  "types": "dist/sketch-paper.d.ts",
   "files": [
     "dist"
   ],
@@ -47,7 +47,7 @@
   "dependencies": {
     "@lastolivegames/becsy": "^0.15.5",
     "@shoelace-style/shoelace": "^2.14.0",
-    "@sketchy-draw/brushes": "workspace:*",
+    "@sketch-paper/brushes": "workspace:*",
     "@twind/core": "^1.1.3",
     "@twind/preset-autoprefix": "^1.0.7",
     "@twind/preset-tailwind": "^1.1.4",

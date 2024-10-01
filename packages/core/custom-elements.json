@@ -2,8 +2,8 @@
   "version": "experimental",
   "tags": [
     {
-      "name": "sketchy-draw-canvas",
-      "path": "./src\\elements\\canvas\\sketchyDrawCanvas.ts",
+      "name": "sketch-paper",
+      "path": "./src\\elements\\canvas\\sketchPaper.ts",
       "properties": [
         {
           "name": "styles",

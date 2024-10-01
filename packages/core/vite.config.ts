@@ -5,7 +5,7 @@ export default defineConfig({
   plugins: [glsl()],
   build: {
     lib: {
-      entry: 'src/sketchy-draw.ts',
+      entry: 'src/sketch-paper.ts',
       formats: ['es'],
     },
     rollupOptions: {

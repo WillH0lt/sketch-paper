@@ -1,0 +1,49 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: crayontown-ws-ingress
+  namespace: crayontown
+  annotations:
+    kubernetes.io/ingress.class: public
+    cert-manager.io/cluster-issuer: lets-encrypt
+spec:
+  tls:
+    - hosts:
+        - ws.crayon.town
+      secretName: api-ingress-tls
+  rules:
+    - host: ws.crayon.town
+      http:
+        paths:
+          - backend:
+              service:
+                name: crayontown-ws
+                port:
+                  number: 80
+            path: /
+            pathType: ImplementationSpecific
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: crayontown-images-ingress
+  namespace: crayontown
+  annotations:
+    kubernetes.io/ingress.class: public
+    cert-manager.io/cluster-issuer: lets-encrypt
+spec:
+  tls:
+    - hosts:
+        - images.crayon.town
+      secretName: images-ingress-tls
+  rules:
+    - host: images.crayon.town
+      http:
+        paths:
+          - backend:
+              service:
+                name: crayontown-images
+                port:
+                  number: 80
+            path: /
+            pathType: ImplementationSpecific

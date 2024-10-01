@@ -1,6 +1,6 @@
 import { co, system } from '@lastolivegames/becsy';
-import type { BaseBrush } from '@sketchy-draw/brushes';
-import { CrayonBrush } from '@sketchy-draw/brushes';
+import type { BaseBrush } from '@sketch-paper/brushes';
+import { CrayonBrush } from '@sketch-paper/brushes';
 import type { Viewport } from 'pixi-viewport';
 import type * as PIXI from 'pixi.js';
 import type { Emitter } from 'strict-event-emitter';

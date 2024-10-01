@@ -1,0 +1,93 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: crayontown-ws
+  namespace: crayontown
+spec:
+  template:
+    spec:
+      containers:
+        - name: crayontown-ws
+          image: localhost:32000/crayontown-ws
+          env:
+            - name: WS_DEBUG
+              value: 'false'
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: crayontown-ws
+  namespace: crayontown
+spec:
+  type: ClusterIP
+  selector:
+    app: crayontown-ws
+  ports:
+    - protocol: TCP
+      port: 8087
+      targetPort: 8087
+      $patch: delete
+    - protocol: TCP
+      port: 80
+      targetPort: 8087
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: crayontown-cleaner
+  namespace: crayontown
+spec:
+  schedule: '*/5 * * * *'
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: crayontown-cleaner
+              image: localhost:32000/crayontown-cleaner
+              env:
+                - name: CLEANER_DEBUG
+                  value: 'false'
+                - name: CLEANER_BUCKET_NAME
+                  value: 'https://images.crayon.town'
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: crayontown-images
+  namespace: crayontown
+spec:
+  selector:
+    matchLabels:
+      app: crayontown-images
+  template:
+    metadata:
+      labels:
+        app: crayontown-images
+    spec:
+      containers:
+        - name: crayontown-images
+          image: localhost:32000/crayontown-images
+          env:
+            - name: IMAGES_DEBUG
+              value: 'false'
+            - name: IMAGES_BUCKET_NAME
+              value: 'crayontown'
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: crayontown-images
+  namespace: crayontown
+spec:
+  type: ClusterIP
+  selector:
+    app: crayontown-images
+  ports:
+    - protocol: TCP
+      port: 8086
+      targetPort: 8086
+      $patch: delete
+    - protocol: TCP
+      port: 80
+      targetPort: 8086

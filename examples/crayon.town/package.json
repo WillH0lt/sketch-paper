@@ -1,0 +1,26 @@
+{
+  "name": "@sketch-paper/crayontown",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "postinstall": "nuxt prepare",
+    "preview": "nuxt preview"
+  },
+  "dependencies": {
+    "@jaames/iro": "^5.5.2",
+    "@sketch-paper/core": "workspace:*",
+    "lit": "^3.2.0",
+    "nuxt": "^3.13.0",
+    "pako": "^2.1.0",
+    "socket.io-client": "^4.8.0",
+    "vue": "latest",
+    "vue-router": "latest"
+  },
+  "devDependencies": {
+    "@nuxtjs/tailwindcss": "^6.12.1",
+    "@types/pako": "^2.0.3"
+  }
+}

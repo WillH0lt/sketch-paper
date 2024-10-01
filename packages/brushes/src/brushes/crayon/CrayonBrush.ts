@@ -14,11 +14,11 @@ class CrayonBrush extends BaseBrush {
     PIXI.Assets.add([
       {
         alias: 'crayonShape',
-        src: 'https://storage.googleapis.com/chalkland-public/brushes/crayon/shape.png',
+        src: 'https://storage.googleapis.com/crayontown-public/brushes/crayon/shape.png',
       },
       {
         alias: 'crayonGrain',
-        src: 'https://storage.googleapis.com/chalkland-public/brushes/crayon/grain.png',
+        src: 'https://storage.googleapis.com/crayontown-public/brushes/crayon/grain.png',
       },
     ]);
 
