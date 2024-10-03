@@ -6,7 +6,7 @@ type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] };
 // Given an event name string, get a valid type for the options to initialize the event that is more restrictive than
 // just CustomEventInit when appropriate (validate the type of the event detail, and require it to be provided if the
 // event requires it)
-type SdEventInit<T> = T extends keyof GlobalEventHandlersEventMap
+type SpEventInit<T> = T extends keyof GlobalEventHandlersEventMap
   ? GlobalEventHandlersEventMap[T] extends CustomEvent<Record<PropertyKey, unknown>>
     ? GlobalEventHandlersEventMap[T] extends CustomEvent<Record<PropertyKey, never>>
       ? CustomEventInit<GlobalEventHandlersEventMap[T]['detail']>
@@ -25,11 +25,11 @@ type GetCustomEventType<T> = T extends keyof GlobalEventHandlersEventMap
     : CustomEvent<unknown>
   : CustomEvent<unknown>;
 
-export default class SdBaseElement extends LitElement {
+export default class SpBaseElement extends LitElement {
   /** Emits a custom event with more convenient defaults. */
   protected emit<T extends keyof GlobalEventHandlersEventMap>(
     name: T,
-    options?: SdEventInit<T> | undefined,
+    options?: SpEventInit<T> | undefined,
   ): GetCustomEventType<T> {
     const event = new CustomEvent(name, {
       bubbles: true,

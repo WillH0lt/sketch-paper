@@ -1,28 +1,29 @@
+import type { DrawSegment } from '@sketch-paper/brushes';
+import { BrushKindEnum } from '@sketch-paper/brushes';
 import type { EventMap } from 'strict-event-emitter';
 
-export enum BrushKindEnum {
-  Brush = 'Brush',
-  Paint = 'Paint',
-  Marker = 'Marker',
-  Crayon = 'Crayon',
-  Smudge = 'Smudge',
-  Eraser = 'Eraser',
-  Line = 'Line',
-  Rectangle = 'Rectangle',
-  Ellipse = 'Ellipse',
-  Star = 'Star',
-  FloodFill = 'FloodFill',
+export { BrushKindEnum } from '@sketch-paper/brushes';
+export type { DrawSegment } from '@sketch-paper/brushes';
+
+export enum InteractionModeEnum {
+  Draw = 'draw',
+  Pan = 'pan',
 }
 
 export interface Brush {
+  red: number;
+  green: number;
+  blue: number;
+  alpha: number;
   kind: BrushKindEnum;
-  color: string;
   size: number;
 }
 
 export interface Settings {
   minZoom: number;
   maxZoom: number;
+  startX: number;
+  startY: number;
   tileCountX: number;
   tileCountY: number;
   tileWidth: number;
@@ -31,24 +32,32 @@ export interface Settings {
   baseColor: string;
   backgroundColor: string;
   allowUndo: boolean;
+  brushes: Exclude<BrushKindEnum, BrushKindEnum.None>[];
 }
 
-export interface DrawSegment {
-  tileX: number;
-  tileY: number;
-  startX: number;
-  startY: number;
-  endX: number;
-  endY: number;
-  red: number;
-  green: number;
-  blue: number;
-  alpha: number;
-  size: number;
+export const defaultSettings: Settings = {
+  minZoom: 0.25,
+  maxZoom: 10,
+  startX: 0,
+  startY: 0,
+  tileCountX: 1,
+  tileCountY: 1,
+  tileWidth: 2048,
+  tileHeight: 2048,
+  baseUrl: '',
+  baseColor: '#C2BCB0',
+  backgroundColor: '#FFFFFF',
+  allowUndo: true,
+  brushes: [BrushKindEnum.Crayon],
+};
+
+export interface Tile {
+  index: [number, number];
 }
 
 export interface Events extends EventMap {
-  'update-brush': [Brush];
-  'draw-outgoing': [DrawSegment];
-  'draw-incoming': [DrawSegment];
+  'update-brush': [Partial<Brush>];
+  'draw-outgoing': [DrawSegment[]];
+  'draw-incoming': [DrawSegment[]];
+  'tile-load': [Tile];
 }

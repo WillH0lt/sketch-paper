@@ -1,9 +1,13 @@
 import * as PIXI from 'pixi.js';
 
 import BaseBrush from '../BaseBrush.js';
+import type { DrawSegment } from '../types.js';
+import { BrushKindEnum } from '../types.js';
 import { CrayonShader } from './CrayonShader.js';
 
 class CrayonBrush extends BaseBrush {
+  public static kind = BrushKindEnum.Crayon;
+
   private lastPosition: [number, number] | null = null;
 
   private shader: CrayonShader | null = null;
@@ -14,11 +18,11 @@ class CrayonBrush extends BaseBrush {
     PIXI.Assets.add([
       {
         alias: 'crayonShape',
-        src: 'https://storage.googleapis.com/crayontown-public/brushes/crayon/shape.png',
+        src: 'https://storage.googleapis.com/sketch-paper-public/brushes/crayon/shape.png',
       },
       {
         alias: 'crayonGrain',
-        src: 'https://storage.googleapis.com/crayontown-public/brushes/crayon/grain.png',
+        src: 'https://storage.googleapis.com/sketch-paper-public/brushes/crayon/grain.png',
       },
     ]);
 
@@ -30,8 +34,6 @@ class CrayonBrush extends BaseBrush {
     this.shader = new CrayonShader({
       crayonShape,
       crayonGrain,
-      brushSize: 30,
-      brushColor: [1, 0, 0, 1],
     });
 
     this.initializeBrush(this.shader, {
@@ -43,27 +45,25 @@ class CrayonBrush extends BaseBrush {
     this.lastPosition = null;
   }
 
-  public draw(
-    pointA: [number, number],
-    pointB: [number, number],
-    surface: PIXI.Sprite | PIXI.Mesh,
-  ): void {
+  public draw(segment: DrawSegment, texture: PIXI.Texture): void {
     if (!this.brush || !this.shader) return;
 
-    const size = this.shader.getBrushSize();
+    this.shader.setBrushColor([segment.red, segment.green, segment.blue, segment.alpha]);
 
-    const distance = Math.sqrt((pointB[0] - pointA[0]) ** 2 + (pointB[1] - pointA[1]) ** 2);
+    const distance = Math.sqrt(
+      (segment.endX - segment.startX) ** 2 + (segment.endY - segment.startY) ** 2,
+    );
 
     let d = 0.1;
-    if (size > 25) {
+    if (segment.size > 25) {
       d = 0.05;
     }
-    const nPoints = Math.floor(distance / (d * size));
+    const nPoints = Math.floor(distance / (d * segment.size));
 
     const points = [];
     for (let i = 0; i < nPoints; i++) {
-      const x = pointA[0] + (pointB[0] - pointA[0]) * (i / nPoints);
-      const y = pointA[1] + (pointB[1] - pointA[1]) * (i / nPoints);
+      const x = segment.startX + (segment.endX - segment.startX) * (i / nPoints);
+      const y = segment.startY + (segment.endY - segment.startY) * (i / nPoints);
       points.push([x, y]);
     }
 
@@ -82,12 +82,12 @@ class CrayonBrush extends BaseBrush {
 
       this.transform
         .identity()
-        .scale(size, size)
-        .translate(x - surface.position.x - size / 2, y - surface.position.y - size / 2);
+        .scale(segment.size, segment.size)
+        .translate(x - segment.tileX - segment.size / 2, y - segment.tileY - segment.size / 2);
 
       this.app.renderer.render({
         transform: this.transform,
-        target: surface.texture,
+        target: texture,
         container: this.brush,
         clear: false,
       });
@@ -96,9 +96,3 @@ class CrayonBrush extends BaseBrush {
 }
 
 export default CrayonBrush;
-
-declare global {
-  interface GlobalBrushMap {
-    crayon: CrayonBrush;
-  }
-}

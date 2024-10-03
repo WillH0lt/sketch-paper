@@ -9,6 +9,8 @@ require (
 	github.com/zishang520/socket.io/v2 v2.3.0
 )
 
+require github.com/mitchellh/mapstructure v1.5.0 // indirect
+
 require (
 	github.com/andybalholm/brotli v1.1.0 // indirect
 	github.com/bytedance/sonic v1.9.1 // indirect

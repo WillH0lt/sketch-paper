@@ -68,12 +68,7 @@ class SketchPaper {
     }
 
     for (const segment of segments) {
-      const startX = segment.startX;
-      const startY = segment.startY;
-      const endX = segment.endX;
-      const endY = segment.endY;
-
-      this.brush.draw([startX, startY], [endX, endY], this.sprite);
+      this.brush.draw(segment, this.sprite.texture);
     }
 
     console.log('done');

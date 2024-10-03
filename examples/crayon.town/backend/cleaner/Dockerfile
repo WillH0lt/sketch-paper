@@ -3,6 +3,7 @@ FROM golang:1.23-alpine as go-build
 WORKDIR /build
 
 COPY cleaner/go.* ./cleaner/
+COPY shared/go.* ./shared/
 
 WORKDIR /build/cleaner/
 
@@ -10,6 +11,7 @@ RUN go mod download
 
 WORKDIR /build
 
+COPY ./shared/ ./shared/
 COPY ./cleaner/ ./cleaner/
 
 WORKDIR /build/cleaner/
@@ -17,10 +19,19 @@ WORKDIR /build/cleaner/
 ENV GOCACHE=/root/.cache/go-build
 RUN --mount=type=cache,target="/root/.cache/go-build" GOOS=linux go build
 
-FROM scratch
+FROM ubuntu:20.04
+
+RUN apt-get update
+RUN apt-get install -y wget
+RUN wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+
+ENV TZ=America/Denver
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+RUN apt-get install -y ./google-chrome-stable_current_amd64.deb
 
 WORKDIR /app
 COPY --from=go-build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
-COPY --from=go-build /build/cleaner /app
+COPY --from=go-build /build/cleaner/screenshotView/dist /app/screenshotView/dist
+COPY --from=go-build /build/cleaner/cleaner /app/cleaner
 
 CMD ["/app/cleaner"]

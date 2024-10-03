@@ -1,3 +1,4 @@
-export type { SdDrawEvent } from './sd-draw.js';
-export type { SdMoveEvent } from './sd-move.js';
-export type { SdZoomEvent } from './sd-zoom.js';
+export type { SpDrawEvent } from './sp-draw.js';
+export type { SpMoveEvent } from './sp-move.js';
+export type { SpTileLoadEvent } from './sp-tile-load.js';
+export type { SpZoomEvent } from './sp-zoom.js';

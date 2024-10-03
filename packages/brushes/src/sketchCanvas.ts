@@ -3,6 +3,7 @@ import { Viewport } from 'pixi-viewport';
 import * as PIXI from 'pixi.js';
 
 import { CrayonBrush } from './brushes/index.js';
+import { BrushKindEnum } from './brushes/types.js';
 
 async function setupSketchCanvas(element: HTMLElement): Promise<void> {
   // ===========================================================
@@ -52,15 +53,15 @@ async function setupSketchCanvas(element: HTMLElement): Promise<void> {
   });
 
   // //
-  // const white = new PIXI.Sprite(PIXI.Texture.WHITE);
-  // white.width = texture.width;
-  // white.height = texture.height;
+  const white = new PIXI.Sprite(PIXI.Texture.WHITE);
+  white.width = texture.width;
+  white.height = texture.height;
 
-  // app.renderer.render({
-  //   container: white,
-  //   target: texture,
-  //   clear: true,
-  // });
+  app.renderer.render({
+    container: white,
+    target: texture,
+    clear: true,
+  });
   // //
 
   const sprite = new PIXI.Sprite(texture);
@@ -90,7 +91,24 @@ async function setupSketchCanvas(element: HTMLElement): Promise<void> {
       return;
     }
 
-    brush.draw([last.x, last.y], [curr.x, curr.y], sprite);
+    brush.draw(
+      {
+        tileX: 0,
+        tileY: 0,
+        startX: last.x,
+        startY: last.y,
+        endX: curr.x,
+        endY: curr.y,
+        red: 0,
+        green: 255,
+        blue: 0,
+        alpha: 255,
+        size: 10,
+        kind: BrushKindEnum.Crayon,
+      },
+      texture,
+    );
+
     last = curr;
   });
 

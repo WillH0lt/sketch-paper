@@ -50,8 +50,7 @@ func makeScreenshot(img *image.RGBA, segments []*models.DrawSegment) error {
 	}
 	segmentsStr = segmentsStr[:len(segmentsStr)-1] + "]"
 
-	positionX := int(segments[0].TileX) * w
-	positionY := int(segments[0].TileY) * h
+	fmt.Println(segmentsStr)
 
 	t1 := time.Now()
 	if err := chromedp.Run(ctx1, chromedp.Tasks{
@@ -68,7 +67,7 @@ func makeScreenshot(img *image.RGBA, segments []*models.DrawSegment) error {
 		chromedp.Evaluate(`
 		(async () => {
 			const canvas = window.SketchPaper;
-			await canvas.init(document.getElementById("app"), `+strconv.Itoa(positionX)+`, `+strconv.Itoa(positionY)+`);
+			await canvas.init(document.getElementById("app"), `+strconv.Itoa(int(segments[0].TileX))+`, `+strconv.Itoa(int(segments[0].TileY))+`);
 			await canvas.loadImage("`+b64Img+`");
 			canvas.draw(`+segmentsStr+`);
 		})();`, &res, func(p *runtime.EvaluateParams) *runtime.EvaluateParams {

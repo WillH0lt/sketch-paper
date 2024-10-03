@@ -54,21 +54,8 @@ export class CrayonShader extends BaseShader {
     return this.resources as CrayonResources;
   }
 
-  public getBrushSize(): number {
-    return this.crayonResources.brushUniforms.uniforms.uBrushSize;
-  }
-
   public setBrushSize(value: number): void {
     this.crayonResources.brushUniforms.uniforms.uBrushSize = value;
-  }
-
-  public getBrushColor(): [number, number, number, number] {
-    return [
-      this.crayonResources.brushUniforms.uniforms.uBrushColor[0] * 255,
-      this.crayonResources.brushUniforms.uniforms.uBrushColor[1] * 255,
-      this.crayonResources.brushUniforms.uniforms.uBrushColor[2] * 255,
-      this.crayonResources.brushUniforms.uniforms.uBrushColor[3] * 255,
-    ];
   }
 
   public setBrushColor(value: [number, number, number, number]): void {

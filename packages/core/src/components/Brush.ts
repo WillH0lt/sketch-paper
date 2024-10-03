@@ -1,16 +1,20 @@
 import { component, field, Type } from '@lastolivegames/becsy';
 
-import { BrushKindEnum } from '../types.js';
+import type { BrushKindEnum } from '../types.js';
 
 @component
 class Brush {
-  @field.staticString(Object.values(BrushKindEnum))
-  public declare kind: BrushKindEnum;
+  @field.uint8 public declare kind: BrushKindEnum;
 
-  @field({ type: Type.dynamicString(9), default: '#D94141' })
-  public declare color: string;
+  @field.uint8 public declare red: number;
 
-  @field({ type: Type.float64, default: 25 }) public declare size: number;
+  @field.uint8 public declare green: number;
+
+  @field.uint8 public declare blue: number;
+
+  @field.uint8 public declare alpha: number;
+
+  @field({ type: Type.uint16, default: 25 }) public declare size: number;
 }
 
 export default Brush;

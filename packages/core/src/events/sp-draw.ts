@@ -1,9 +1,9 @@
 import type { DrawSegment } from '../types.js';
 
-export type SdDrawEvent = CustomEvent<DrawSegment>;
+export type SpDrawEvent = CustomEvent<DrawSegment[]>;
 
 declare global {
   interface GlobalEventHandlersEventMap {
-    'sd-draw': SdDrawEvent;
+    'sp-draw': SpDrawEvent;
   }
 }

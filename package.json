@@ -6,6 +6,7 @@
   "private": true,
   "workspaces": [
     "examples/*",
+    "examples/crayon.town/backend/cleaner/screenshotView",
     "packages/*"
   ],
   "keywords": [],

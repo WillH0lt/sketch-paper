@@ -2,9 +2,11 @@ import type { Entity } from '@lastolivegames/becsy';
 import { co, system } from '@lastolivegames/becsy';
 import type { Viewport } from 'pixi-viewport';
 import * as PIXI from 'pixi.js';
+import type { Emitter } from 'strict-event-emitter';
 import { v4 as uuid } from 'uuid';
 
 import * as comps from '../components/index.js';
+import type { Events } from '../types.js';
 import SketchBase from './SketchBase.js';
 import SketchStrokeHandler from './SketchStrokeHandler.js';
 import ViewportHandler from './ViewportHandler.js';
@@ -15,6 +17,8 @@ class SketchTileHandler extends SketchBase {
   public readonly app!: PIXI.Application;
 
   public readonly viewport!: Viewport;
+
+  public readonly emitter!: Emitter<Events>;
 
   private readonly settings = this.singleton.read(comps.Settings);
 
@@ -39,34 +43,45 @@ class SketchTileHandler extends SketchBase {
     const heldTileEntity = tileEntity.hold();
     heldTileEntity.write(comps.Tile).loading = true;
 
-    let tmpSprite: PIXI.Sprite | null = null;
-    if (image === '') {
-      tmpSprite = new PIXI.Sprite(PIXI.Texture.WHITE);
-      tmpSprite.tint = hexToNumber(this.settings.baseColor);
-      tmpSprite.width = this.settings.tileWidth;
-      tmpSprite.height = this.settings.tileHeight;
-    } else {
+    const sprite = new PIXI.Sprite();
+    if (image !== '') {
       const texture = (yield* waitForPromise(
         PIXI.Assets.load({
           src: image,
           loadParser: 'loadTextures',
+        }).catch(() => {
+          // supressing 404 errors
         }),
-      )) as PIXI.Texture;
+      )) as PIXI.Texture | { error: unknown };
 
-      tmpSprite = new PIXI.Sprite();
-      tmpSprite.texture = texture;
+      if (texture instanceof PIXI.Texture) {
+        sprite.texture = texture;
+      }
+    }
+
+    if (sprite.texture.label === 'EMPTY') {
+      sprite.texture = PIXI.Texture.WHITE;
+      sprite.tint = hexToNumber(this.settings.baseColor);
+      sprite.width = this.settings.tileWidth;
+      sprite.height = this.settings.tileHeight;
     }
 
     this.app.renderer.render({
-      container: tmpSprite,
+      container: sprite,
       target: tileSprite.texture,
       clear: true,
     });
 
     tileSprite.texture.source.label = image;
-    // yield* this.waitForPromise(PIXI.Assets.unload(image));
 
     heldTileEntity.write(comps.Tile).loading = false;
+
+    if (image.includes(this.settings.baseUrl)) {
+      const i = heldTileEntity.read(comps.Tile).index;
+      this.emitter.emit('tile-load', {
+        index: [i[0], i[1]],
+      });
+    }
   }
 
   public execute(): void {
@@ -101,7 +116,7 @@ class SketchTileHandler extends SketchBase {
       this.viewport.addChild(tileSprite);
     }
 
-    // update tile sprite positions and images
+    // update tile sprite images
     for (const tileSourceEntity of this.tileSources.addedOrChanged) {
       const tileEntity = tileSourceEntity.read(comps.TileSource).tiles[0];
       this.applyImageToTile(tileEntity);

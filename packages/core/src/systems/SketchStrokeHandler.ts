@@ -1,14 +1,13 @@
 import { co, system } from '@lastolivegames/becsy';
 import type { BaseBrush } from '@sketch-paper/brushes';
-import { CrayonBrush } from '@sketch-paper/brushes';
 import type { Viewport } from 'pixi-viewport';
 import type * as PIXI from 'pixi.js';
 import type { Emitter } from 'strict-event-emitter';
 
 import * as comps from '../components/index.js';
-import type { DrawSegment, Events } from '../types.js';
+import type { BrushKindEnum, DrawSegment, Events } from '../types.js';
 import SketchBase from './SketchBase.js';
-import { deleteEntity, hexToRgba, waitForPromise } from './common.js';
+import { deleteEntity } from './common.js';
 
 @system
 class SketchStrokeHandler extends SketchBase {
@@ -24,77 +23,37 @@ class SketchStrokeHandler extends SketchBase {
 
   private readonly settings = this.singleton.read(comps.Settings);
 
-  private readonly brushes = this.query((q) => q.addedOrChanged.with(comps.Brush).trackWrites);
-
   private readonly strokes = this.query((q) => q.current.with(comps.Stroke).write);
 
   private readonly tiles = this.query((q) => q.current.with(comps.Tile));
 
-  private brushInstance: BaseBrush | null = null;
+  private readonly brushInstances = new Map<BrushKindEnum, BaseBrush>();
 
-  @co private *updateBrushInstance(): Generator {
-    co.cancelIfCoroutineStarted();
+  @co private *handleDrawIncoming(segments: DrawSegment[]): Generator {
+    const groupedSegments = new Map<string, DrawSegment[]>();
+    for (const segment of segments) {
+      const key = `${segment.tileX},${segment.tileY}`;
+      if (!groupedSegments.has(key)) {
+        groupedSegments.set(key, []);
+      }
 
-    this.brushInstance = new CrayonBrush(this.app);
-    yield* waitForPromise(this.brushInstance.init());
+      groupedSegments.get(key)?.push(segment);
+    }
 
-    // if (brush.kind === BrushKind.Crayon) {
-    //   if (this.brushInstance === null || this.brushInstance.kind !== BrushKind.Crayon) {
-    //     const textures = (yield* waitForPromise(
-    //       PIXI.Assets.load(['crayonShape', 'paintGrain']),
-    //     )) as { crayonShape: PIXI.Texture; paintGrain: PIXI.Texture };
+    for (const [key, segmentGroup] of groupedSegments) {
+      const [tileX, tileY] = key.split(',').map(Number);
+      for (const tileEntity of this.tiles.current) {
+        const tile = tileEntity.read(comps.Tile);
+        if (tile.position[0] !== tileX || tile.position[1] !== tileY || tile.loading) continue;
 
-    //     this.brushInstance = new CrayonBrush(this.app, textures.crayonShape, textures.paintGrain);
-    //   }
-    // } else if (brush.kind === BrushKind.Smudge) {
-    //   if (this.brushInstance === null || this.brushInstance.kind !== BrushKind.Smudge) {
-    //     const shapeTexture = (yield* waitForPromise(PIXI.Assets.load('smudge'))) as PIXI.Texture;
-    //     this.brushInstance = new SmudgeBrush(this.app, shapeTexture);
-    //   }
-    // } else if (brush.kind === BrushKind.Paint) {
-    //   if (this.brushInstance === null || this.brushInstance.kind !== BrushKind.Paint) {
-    //     const textures = (yield* waitForPromise(
-    //       PIXI.Assets.load(['paintShape', 'paintGrain']),
-    //     )) as {
-    //       paintShape: PIXI.Texture;
-    //       paintGrain: PIXI.Texture;
-    //     };
-    //     const shapeTexture = textures.paintShape;
-    //     const grainTexture = textures.paintGrain;
-    //     this.brushInstance = new PaintBrush(this.app, shapeTexture, grainTexture);
-    //   }
-    // } else if (brush.kind === BrushKind.Marker) {
-    //   if (this.brushInstance === null || this.brushInstance.kind !== BrushKind.Marker) {
-    //     const textures = (yield* waitForPromise(
-    //       PIXI.Assets.load(['markerShape', 'paintGrain']),
-    //     )) as { markerShape: PIXI.Texture; paintGrain: PIXI.Texture };
-    //     const shapeTexture = textures.markerShape;
-    //     const grainTexture = textures.paintGrain;
-    //     this.brushInstance = new MarkerBrush(this.app, shapeTexture, grainTexture);
-    //   }
-    // } else {
-    //   this.brushInstance = null;
-    // }
+        const tileSprite = this.getTileSprite(tileEntity);
+        if (!tileSprite) continue;
 
-    // if (this.brushInstance) {
-    this.brushInstance.size = this.brush.size;
-    this.brushInstance.color = hexToRgba(this.brush.color);
-    // }
-  }
-
-  @co private *handleDrawIncoming(segment: DrawSegment): Generator {
-    for (const tileEntity of this.tiles.current) {
-      const tile = tileEntity.read(comps.Tile);
-      if (tile.index[0] !== segment.tileX || tile.index[1] !== segment.tileY) continue;
-
-      const tileSprite = this.getTileSprite(tileEntity);
-      if (!tileSprite) continue;
-
-      this.brushInstance?.draw(
-        [segment.startX, segment.startY],
-        [segment.endX, segment.endY],
-        tileSprite,
-      );
+        for (const segment of segmentGroup) {
+          const brush = this.brushInstances.get(segment.kind);
+          brush?.draw(segment, tileSprite.texture);
+        }
+      }
     }
 
     yield;
@@ -103,31 +62,29 @@ class SketchStrokeHandler extends SketchBase {
   public initialize(): void {
     super.initialize();
 
-    this.emitter.on('draw-incoming', (segment: DrawSegment) => {
-      this.handleDrawIncoming(segment);
+    this.emitter.on('draw-incoming', (segments: DrawSegment[]) => {
+      this.handleDrawIncoming(segments);
     });
   }
 
   public execute(): void {
-    for (const brushEntity of this.brushes.addedOrChanged) {
-      // TODO pass brush to updateBrushInstance
-      brushEntity.read(comps.Brush);
-      this.updateBrushInstance();
-    }
-
     if (this.input.pointerDownTrigger) {
-      if (this.brushInstance) {
+      console.log('====', this.brush.kind);
+      const brush = this.brushInstances.get(this.brush.kind);
+
+      if (brush) {
         this.createEntity(comps.Stroke, {
           prevPoint: this.input.pointerWorld,
         });
 
-        this.brushInstance.onStrokeStart();
+        brush.onStrokeStart();
       }
     }
 
     // render strokes
     for (const strokeEntity of this.strokes.current) {
-      if (!this.brushInstance) continue;
+      const brush = this.brushInstances.get(this.brush.kind);
+      if (!brush) continue;
 
       const stroke = strokeEntity.write(comps.Stroke);
 
@@ -146,6 +103,7 @@ class SketchStrokeHandler extends SketchBase {
         .concat(intersectedB)
         .filter((tile, index, self) => index === self.findIndex((t) => t === tile));
 
+      const segments = [];
       for (const tileSprite of tilesSprites) {
         const tileEntity = this.getTileEntity(tileSprite);
         if (!tileEntity) continue;
@@ -154,37 +112,40 @@ class SketchStrokeHandler extends SketchBase {
         tile.strokeEntity = strokeEntity;
 
         const segment = {
-          tileX: tile.index[0],
-          tileY: tile.index[1],
+          tileX: tileSprite.position.x,
+          tileY: tileSprite.position.y,
           startX: start[0],
           startY: start[1],
           endX: end[0],
           endY: end[1],
-          red: this.brushInstance.color[0],
-          green: this.brushInstance.color[1],
-          blue: this.brushInstance.color[2],
-          alpha: this.brushInstance.color[3],
-          size: this.brushInstance.size,
+          red: this.brush.red,
+          green: this.brush.green,
+          blue: this.brush.blue,
+          alpha: this.brush.alpha,
+          size: this.brush.size,
+          kind: this.brush.kind,
         };
 
-        this.brushInstance.draw(
-          [segment.startX, segment.startY],
-          [segment.endX, segment.endY],
-          tileSprite,
-        );
-        this.emitter.emit('draw-outgoing', segment);
+        brush.draw(segment, tileSprite.texture);
+        segments.push(segment);
+      }
+
+      if (segments.length > 0) {
+        this.emitter.emit('draw-outgoing', segments);
       }
     }
 
     // delete strokes on pointer up
     if (this.input.pointerUpTrigger) {
-      for (const strokeEntity of this.strokes.current) {
-        const stroke = strokeEntity.read(comps.Stroke);
-        this.snapshotTiles(stroke.tiles);
-        deleteEntity(strokeEntity);
+      const brush = this.brushInstances.get(this.brush.kind);
+      if (brush) {
+        for (const strokeEntity of this.strokes.current) {
+          const stroke = strokeEntity.read(comps.Stroke);
+          this.snapshotTiles(stroke.tiles);
+          deleteEntity(strokeEntity);
+        }
+        brush.onStrokeEnd();
       }
-
-      this.brushInstance?.onStrokeEnd();
     }
   }
 

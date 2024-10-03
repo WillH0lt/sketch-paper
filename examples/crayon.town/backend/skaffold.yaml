@@ -10,9 +10,6 @@ build:
     - image: gcr.io/crayontown/crayontown-cleaner
       docker:
         dockerfile: cleaner/Dockerfile
-    - image: gcr.io/crayontown/crayontown-images
-      docker:
-        dockerfile: images/Dockerfile
 manifests:
   kustomize:
     paths:
@@ -45,9 +42,6 @@ profiles:
         path: /build/artifacts/1/image
         value: localhost:32000/crayontown-cleaner
       - op: replace
-        path: /build/artifacts/2/image
-        value: localhost:32000/crayontown-images
-      - op: replace
         path: /manifests/kustomize/paths
         value:
           - k8s/overlays/microk8s
@@ -66,4 +60,4 @@ profiles:
 # skaffold run -p microk8s
 
 # Run cron job manually
-# kubectl create job --from=cronjob/crayontown-cleaner crayontown-cleaner-000
+# kubectl create job --from=cronjob/crayontown-cleaner crayontown-cleaner-000 --namespace crayontown

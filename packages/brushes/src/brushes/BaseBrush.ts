@@ -1,12 +1,12 @@
 import * as PIXI from 'pixi.js';
 import type BaseShader from './BaseShader.js';
+import type { DrawSegment } from './types.js';
+import { BrushKindEnum } from './types.js';
 
 const SCALE = 1000;
 
 abstract class BaseBrush {
-  public color: [number, number, number, number] = [0, 0, 0, 0];
-
-  public size = 0;
+  public static kind = BrushKindEnum.None;
 
   protected brush: PIXI.Mesh | null = null;
 
@@ -44,11 +44,7 @@ abstract class BaseBrush {
 
   public abstract init(): Promise<void>;
 
-  public abstract draw(
-    pointA: [number, number],
-    pointB: [number, number],
-    surface: PIXI.Sprite | PIXI.Mesh,
-  ): void;
+  public abstract draw(segment: DrawSegment, texture: PIXI.Texture): void;
 }
 
 export default BaseBrush;

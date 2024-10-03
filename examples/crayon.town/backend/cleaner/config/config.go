@@ -7,10 +7,14 @@ import (
 )
 
 type Config struct {
-	Debug     bool   `default:"true"`
-	RedisHost string `default:"localhost" split_words:"true"`
-	RedisPort int    `default:"6379" split_words:"true"`
-	ImagesUrl string `default:"http://localhost:8086" split_words:"true"`
+	Debug          bool         `default:"true"`
+	BaseColor      ColorDecoder `default:"#303030" split_words:"true"`
+	TileWidth      int          `default:"2048" split_words:"true"`
+	TileHeight     int          `default:"2048" split_words:"true"`
+	RedisPort      int          `default:"6379" split_words:"true"`
+	RedisHost      string       `default:"localhost" split_words:"true"`
+	BucketName     string       `default:"sketch-paper-public" split_words:"true"`
+	ServiceAccount string       `default:"./service-account.json" split_words:"true"`
 }
 
 func GetConfig() Config {
