@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/base64"
-	"encoding/json"
 	"fmt"
 	"image"
 	"image/color"
@@ -19,9 +18,10 @@ import (
 	"github.com/disintegration/imaging"
 	"github.com/willH0lt/sketch-paper/examples/crayon.town/backend/cleaner/config"
 	"github.com/willH0lt/sketch-paper/examples/crayon.town/backend/shared/models"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
-func Draw(ctx context.Context, img *image.RGBA, segments models.DrawSegments) error {
+func Draw(ctx context.Context, img *image.RGBA, stroke *models.Stroke) error {
 
 	ctx1, cancel := chromedp.NewContext(ctx)
 	defer cancel()
@@ -40,17 +40,19 @@ func Draw(ctx context.Context, img *image.RGBA, segments models.DrawSegments) er
 	var buf []byte
 	cwd, _ := os.Getwd()
 
+	marshaller := protojson.MarshalOptions{
+		EmitUnpopulated: true,
+	}
+
 	segmentsStr := "["
-	for _, segment := range segments {
-		segmentStr, err := json.Marshal(segment)
+	for _, segment := range stroke.Segments {
+		segmentStr, err := marshaller.Marshal(segment)
 		if err != nil {
 			return fmt.Errorf("error marshalling segment: %w", err)
 		}
 		segmentsStr += string(segmentStr) + ","
 	}
 	segmentsStr = segmentsStr[:len(segmentsStr)-1] + "]"
-
-	fmt.Println(segmentsStr)
 
 	t1 := time.Now()
 	if err := chromedp.Run(ctx1, chromedp.Tasks{
@@ -67,7 +69,7 @@ func Draw(ctx context.Context, img *image.RGBA, segments models.DrawSegments) er
 		chromedp.Evaluate(`
 		(async () => {
 			const canvas = window.SketchPaper;
-			await canvas.init(document.getElementById("app"), `+strconv.Itoa(int(segments[0].TileX))+`, `+strconv.Itoa(int(segments[0].TileY))+`);
+			await canvas.init(document.getElementById("app"), `+strconv.Itoa(int(stroke.Segments[0].TileX))+`, `+strconv.Itoa(int(stroke.Segments[0].TileY))+`);
 			await canvas.loadImage("`+b64Img+`");
 			canvas.draw(`+segmentsStr+`);
 		})();`, &res, func(p *runtime.EvaluateParams) *runtime.EvaluateParams {

@@ -1,7 +1,9 @@
 <template>
-  <div class="flex relative [&>*]:flex-1 h-20 bg-white rounded-xl shadow-md pointer-events-auto">
+  <div class="relative w-full pointer-events-auto">
+    <div class="fixed inset-0" v-if="colorPickerVisible" @click="colorPickerVisible = false"></div>
+
     <div
-      class="absolute bottom-12 left-0 right-0 h-72 bg-[#cfcfc6] rounded-t-xl shadow-md transition -z-10"
+      class="absolute bottom-12 left-0 right-0 h-72 bg-[#cfcfc6] rounded-t-2xl drop-shadow-lg transition"
       :class="{
         'translate-y-[150%]': !colorPickerVisible,
         'translate-y-0': colorPickerVisible,
@@ -10,36 +12,52 @@
       <div ref="colorPickerRef" class="w-full flex justify-center mt-10"></div>
     </div>
 
-    <div
-      class="rounded-full bg-black"
-      :class="{
-        'bg-white': brush.kind === BrushKindEnum.None,
-      }"
-      @click="brush.kind = BrushKindEnum.None"
-    ></div>
+    <div class="flex flex-1 pt-0.5 relative h-16 bg-white rounded-t-xl drop-shadow-2xl">
+      <div class="cursor-pointer" v-for="(color, index) in colors" @click="handleColorClick(index)">
+        <img
+          class="hover:-translate-y-8 -translate-y-2 transition-transform px-2"
+          :class="{
+            '-translate-y-8': brush.kind === BrushKindEnum.Crayon && index === selectedIndex,
+          }"
+          src="/crayon.png"
+        />
+      </div>
 
-    <div
-      class="cursor-pointer data-[selected=true]:bg-[#00000033]"
-      v-for="(color, index) in colors"
-      @click="handleColorClick(index)"
-      :style="{ backgroundColor: color }"
-      data-selected="${this.brush.kind === tool.kind}"
-    >
-      <img
-        class="hover:-translate-y-8 transition-transform"
-        src="/crayon.png"
-        data-selected="${this.brush.kind === tool.kind}"
-      />
+      <div class="flex items-center justify-center w-24" @click="handlePointerClick">
+        <div
+          class="flex items-center justify-center w-10 h-10 rounded-xl cursor-pointer transition-colors"
+          :class="{
+            'bg-primary': brush.kind === BrushKindEnum.None,
+            'hover:bg-gray': brush.kind !== BrushKindEnum.None,
+          }"
+        >
+          <IconPointer
+            class="text-3xl m-auto stroke-[#231f20] transition-colors"
+            :class="{
+              'stroke-[#004015]': brush.kind === BrushKindEnum.None,
+            }"
+          />
+        </div>
+      </div>
+
+      <div class="flex items-center justify-center w-24">
+        <div
+          class="flex items-center justify-center w-10 h-10 rounded-xl cursor-pointer transition-colors"
+          :class="{
+            'bg-[#acacac]': colorPickerVisible,
+            'hover:bg-gray': !colorPickerVisible,
+          }"
+        >
+          <div
+            class="w-8 h-8 rounded-full cursor-pointer border-2 border-black"
+            @click="handleColorPickerClick"
+            :style="{
+              backgroundColor: brush.color,
+            }"
+          ></div>
+        </div>
+      </div>
     </div>
-
-    <div
-      class="w-3/4 rounded-full"
-      :style="{
-        backgroundColor: brush.color,
-        borderColor: brush.color,
-      }"
-      @click="colorPickerVisible = !colorPickerVisible"
-    ></div>
   </div>
 </template>
 
@@ -47,6 +65,7 @@
 import iro from '@jaames/iro';
 
 import { BrushKindEnum } from '@sketch-paper/core';
+import IconPointer from '~/assets/icons/pointer.svg';
 
 const brush = defineModel<{
   color: string;
@@ -64,6 +83,16 @@ function handleColorClick(index: number) {
   selectedIndex.value = index;
   picker?.color.set(colors.value[index]);
   brush.value.color = colors.value[index];
+  brush.value.kind = BrushKindEnum.Crayon;
+}
+
+function handlePointerClick() {
+  brush.value.kind = BrushKindEnum.None;
+  colorPickerVisible.value = false;
+}
+
+function handleColorPickerClick() {
+  colorPickerVisible.value = !colorPickerVisible.value;
   brush.value.kind = BrushKindEnum.Crayon;
 }
 

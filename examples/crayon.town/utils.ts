@@ -1,44 +1,23 @@
-import pako from 'pako';
-
 import type { DrawSegment } from '@sketch-paper/core';
+import { models } from './models.js';
 
-export function compress(segment: DrawSegment): string {
-  const { tileX, tileY, startX, startY, endX, endY, red, green, blue, alpha, size } = segment;
+export function compress(segments: DrawSegment[]): string {
+  const stroke = models.Stroke.fromObject({ segments });
 
-  const int32Array = new Int32Array([
-    tileX,
-    tileY,
-    startX,
-    startY,
-    endX,
-    endY,
-    red,
-    green,
-    blue,
-    alpha,
-    size,
-  ]);
+  const bytes = stroke.serializeBinary();
 
-  const bytes = pako.deflate(new Uint8Array(int32Array.buffer));
-  const data = window.btoa(String.fromCharCode(...bytes));
-
-  return data;
+  return window.btoa(String.fromCharCode(...bytes));
 }
 
-export function decompress(compressed: string): DrawSegment {
-  const bytes = new Uint8Array(Array.from(window.atob(compressed), (c) => c.charCodeAt(0)));
-  const segment = new Int32Array(pako.inflate(bytes).buffer);
-  return {
-    tileX: segment[0],
-    tileY: segment[1],
-    startX: segment[2],
-    startY: segment[3],
-    endX: segment[4],
-    endY: segment[5],
-    red: segment[6],
-    green: segment[7],
-    blue: segment[8],
-    alpha: segment[9],
-    size: segment[10],
-  };
+export function decompress(data: string): DrawSegment[] {
+  const bytes = new Uint8Array(
+    window
+      .atob(data)
+      .split('')
+      .map((c) => c.charCodeAt(0)),
+  );
+
+  const stroke = models.Stroke.deserializeBinary(bytes);
+
+  return stroke.segments;
 }

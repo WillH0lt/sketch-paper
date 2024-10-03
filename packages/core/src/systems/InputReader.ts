@@ -2,17 +2,8 @@ import { co, system } from '@lastolivegames/becsy';
 import type { Viewport } from 'pixi-viewport';
 
 import * as comps from '../components/index.js';
+import { PointerActions } from '../types.js';
 import BaseSystem from './Base.js';
-
-const MOUSE_TRAVEL_THRESHOLD: Record<string, number> = {
-  mouse: 0.005,
-  touch: 0.05,
-  pen: 0.005,
-};
-
-function distance(a: [number, number], b: [number, number]): number {
-  return Math.sqrt((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2);
-}
 
 @system
 class InputReader extends BaseSystem {
@@ -21,6 +12,8 @@ class InputReader extends BaseSystem {
   public viewport!: Viewport;
 
   private readonly input = this.singleton.write(comps.Input);
+
+  private readonly inputSettings = this.singleton.read(comps.InputSettings);
 
   private readonly pointerIds = new Set<number>();
 
@@ -39,22 +32,8 @@ class InputReader extends BaseSystem {
   public initialize(): void {
     // ==========================================================================
     const pointerMoveFn = (e: PointerEvent): void => {
-      const prevPointerClient = this.input.pointerClient;
-      this.input.pointerClient = [e.offsetX, e.offsetY];
       const pointerWorld = this.viewport.toWorld(e.offsetX, e.offsetY);
       this.input.pointerWorld = [pointerWorld.x, pointerWorld.y];
-
-      if (this.pointerIds.size === 1) {
-        this.input.pointerTravelDistance += distance(this.input.pointerClient, prevPointerClient);
-        if (
-          this.input.pointerTravelDistance > MOUSE_TRAVEL_THRESHOLD[e.pointerType] &&
-          !this.input.didHaveMultiplePointersDown &&
-          !this.input.pointerBeingDragged
-        ) {
-          this.input.pointerBeingDragged = true;
-          this.setInputTrigger('pointerBeingDraggedTrigger');
-        }
-      }
     };
 
     this.container.addEventListener('pointermove', pointerMoveFn);
@@ -64,25 +43,29 @@ class InputReader extends BaseSystem {
 
     // ==========================================================================
     const pointerDownFn = (e: PointerEvent): void => {
-      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      const mouseButtons = [];
+      if (this.inputSettings.actionLeftMouse === PointerActions.Draw) {
+        mouseButtons.push(0);
+      }
+      if (this.inputSettings.actionMiddleMouse === PointerActions.Draw) {
+        mouseButtons.push(1);
+      }
+      if (this.inputSettings.actionRightMouse === PointerActions.Draw) {
+        mouseButtons.push(2);
+      }
+
+      if (e.pointerType === 'mouse' && !mouseButtons.includes(e.button)) return;
 
       // TODO detect pen eraser (e.pointerType === 'pen' && e.buttons === 32)
 
       this.pointerIds.add(e.pointerId);
-      if (this.pointerIds.size > 1) {
-        this.input.didHaveMultiplePointersDown = true;
-      }
 
       this.input.pointerDown = true;
       this.setInputTrigger('pointerDownTrigger');
 
       if (this.pointerIds.size === 1) {
-        this.input.pointerClient = [e.offsetX, e.offsetY];
         const pointerWorld = this.viewport.toWorld(e.offsetX, e.offsetY);
         this.input.pointerWorld = [pointerWorld.x, pointerWorld.y];
-        // pointerPosition.toArray(this.input.dragStart);
-      } else {
-        this.input.pointerBeingDragged = false;
       }
     };
 
@@ -95,11 +78,6 @@ class InputReader extends BaseSystem {
     const pointerCancelFn = (e: PointerEvent): void => {
       this.pointerIds.delete(e.pointerId);
       this.input.pointerDown = false;
-      this.input.pointerBeingDragged = false;
-      if (this.pointerIds.size === 0) {
-        this.input.pointerTravelDistance = 0;
-        this.input.didHaveMultiplePointersDown = false;
-      }
     };
 
     window.document.addEventListener('pointercancel', pointerCancelFn);
@@ -112,43 +90,11 @@ class InputReader extends BaseSystem {
       this.setInputTrigger('pointerUpTrigger');
       this.pointerIds.delete(e.pointerId);
       this.input.pointerDown = false;
-      this.input.pointerBeingDragged = false;
-      if (this.pointerIds.size === 0) {
-        this.input.pointerTravelDistance = 0;
-        this.input.didHaveMultiplePointersDown = false;
-      }
     };
 
     window.document.addEventListener('pointerup', pointerUpFn);
     this.onDestroyCallbacks.push(() => {
       window.document.removeEventListener('pointerup', pointerUpFn);
-    });
-
-    // ==========================================================================
-    const mouseDownFn = (e: MouseEvent): void => {
-      if (e.button === 2) {
-        this.input.rightMouseDown = true;
-        this.input.pointerBeingDragged = false;
-        this.input.didHaveMultiplePointersDown = true;
-        this.setInputTrigger('rightMouseDownTrigger');
-      }
-    };
-
-    window.document.addEventListener('mousedown', mouseDownFn);
-    this.onDestroyCallbacks.push(() => {
-      window.document.removeEventListener('mousedown', mouseDownFn);
-    });
-
-    // ==========================================================================
-    const mouseUpFn = (e: MouseEvent): void => {
-      if (e.button === 2) {
-        this.input.rightMouseDown = false;
-      }
-    };
-
-    window.document.addEventListener('mouseup', mouseUpFn);
-    this.onDestroyCallbacks.push(() => {
-      window.document.removeEventListener('mouseup', mouseUpFn);
     });
 
     // ==========================================================================
@@ -173,11 +119,6 @@ class InputReader extends BaseSystem {
         }
 
         Object.assign(this.input, { [key]: true });
-      }
-
-      if (e.key === 'Escape') {
-        this.input.pointerBeingDragged = false;
-        this.input.didHaveMultiplePointersDown = true;
       }
     };
     window.addEventListener('keydown', keyDownFn);

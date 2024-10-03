@@ -69,7 +69,6 @@ class SketchStrokeHandler extends SketchBase {
 
   public execute(): void {
     if (this.input.pointerDownTrigger) {
-      console.log('====', this.brush.kind);
       const brush = this.brushInstances.get(this.brush.kind);
 
       if (brush) {

@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 
 	mapstructure "github.com/mitchellh/mapstructure"
@@ -10,6 +11,7 @@ import (
 	"github.com/willH0lt/sketch-paper/examples/crayon.town/backend/ws/redis"
 	"github.com/willH0lt/sketch-paper/examples/crayon.town/backend/ws/socket"
 	socketio "github.com/zishang520/socket.io/v2/socket"
+	"google.golang.org/protobuf/proto"
 )
 
 const (
@@ -56,24 +58,44 @@ func handleEventDraw(client *socketio.Socket, data any) error {
 	rdb := redis.GetRedisClient()
 	c := config.GetConfig()
 
-	var segments models.DrawSegments
-	if err := mapstructure.Decode(data, &segments); err != nil {
-		fmt.Println("Error decoding draw segment", err)
+	str, ok := data.(string)
+	if !ok {
+		return fmt.Errorf("data is not a string")
+	}
+
+	byteData, err := base64.StdEncoding.DecodeString(str)
+	if err != nil {
 		return err
 	}
 
-	// group by tileX and tileY
-	groupedSegments := make(map[string]models.DrawSegments)
-	for _, segment := range segments {
-		key := fmt.Sprintf("%d_%d", segment.TileX/int32(c.TileWidth), segment.TileY/int32(c.TileHeight))
-		groupedSegments[key] = append(groupedSegments[key], segment)
+	var stroke models.Stroke
+	if err := proto.Unmarshal(byteData, &stroke); err != nil {
+		return fmt.Errorf("error unmarshalling stroke: %w", err)
 	}
 
-	for key, segments := range groupedSegments {
+	// group by tileX and tileY
+	groupedStrokes := make(map[string]*models.Stroke)
+	for _, segment := range stroke.Segments {
+		key := fmt.Sprintf("%d_%d", segment.TileX/int32(c.TileWidth), segment.TileY/int32(c.TileHeight))
+		stroke, ok := groupedStrokes[key]
+		if !ok {
+			stroke = &models.Stroke{}
+			groupedStrokes[key] = stroke
+		}
+
+		stroke.Segments = append(stroke.Segments, segment)
+	}
+
+	for key, stroke := range groupedStrokes {
+		b, err := proto.Marshal(stroke)
+		if err != nil {
+			return err
+		}
+
 		if _, err := rdb.RPush(
 			context.Background(),
 			key,
-			segments,
+			b,
 		).Result(); err != nil {
 			return err
 		}
@@ -110,17 +132,24 @@ func handleEventTileLoad(client *socketio.Socket, data any) error {
 		return nil
 	}
 
-	var allSegments models.DrawSegments
+	stroke := &models.Stroke{}
 	for _, record := range records {
-		var segments models.DrawSegments
-		if err := segments.UnmarshalBinary([]byte(record)); err != nil {
-			return err
+		var s models.Stroke
+		if err := proto.Unmarshal([]byte(record), &s); err != nil {
+			return fmt.Errorf("error unmarshalling stroke: %w", err)
 		}
-		allSegments = append(allSegments, segments...)
+		stroke.Segments = append(stroke.Segments, s.Segments...)
 	}
 
+	byteData, err := proto.Marshal(stroke)
+	if err != nil {
+		return err
+	}
+
+	str := base64.StdEncoding.EncodeToString(byteData)
+
 	io := socket.GetIo()
-	if err := io.To(socketio.Room(client.Id())).Emit(EventDraw, allSegments); err != nil {
+	if err := io.To(socketio.Room(client.Id())).Emit(EventDraw, str); err != nil {
 		return err
 	}
 

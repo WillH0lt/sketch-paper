@@ -12,7 +12,7 @@ import * as comps from '../../components/index.js';
 import { hexToNumber, hexToRgba } from '../../systems/common.js';
 import * as sys from '../../systems/index.js';
 import type { DrawSegment, Events, Settings, Tile } from '../../types.js';
-import { BrushKindEnum, InteractionModeEnum, defaultSettings } from '../../types.js';
+import { BrushKindEnum, PointerActions, WheelActions, defaultSettings } from '../../types.js';
 import SpBaseElement from '../base/sketchPaperBase.js';
 
 @customElement('sketch-paper')
@@ -33,8 +33,17 @@ class SketchPaper extends SpBaseElement {
   @property({ attribute: 'brush-size', type: Number })
   private readonly brushSize = 10;
 
-  @property({ attribute: 'interaction-mode', type: InteractionModeEnum })
-  private readonly mode: InteractionModeEnum = InteractionModeEnum.Draw;
+  @property({ attribute: 'action-left-mouse', type: PointerActions })
+  private readonly actionLeftMouse: PointerActions = PointerActions.Draw;
+
+  @property({ attribute: 'action-middle-mouse', type: PointerActions })
+  private readonly actionMiddleMouse: PointerActions = PointerActions.Pan;
+
+  @property({ attribute: 'action-right-mouse', type: PointerActions })
+  private readonly actionRightMouse: PointerActions = PointerActions.Pan;
+
+  @property({ attribute: 'action-wheel', type: WheelActions })
+  private readonly actionWheel: WheelActions = WheelActions.Zoom;
 
   @query('#container')
   private readonly container!: HTMLDivElement;
@@ -56,9 +65,9 @@ class SketchPaper extends SpBaseElement {
     super.attributeChangedCallback(name, _old, _value);
 
     if (name.startsWith('brush-')) {
-      this.handleBrushUpdate(name);
-    } else if (name === 'interaction-mode') {
-      this.handleModeUpdate();
+      this.updateBrush(name);
+    } else if (name.startsWith('action-')) {
+      this.updateControls();
     }
   }
 
@@ -103,34 +112,21 @@ class SketchPaper extends SpBaseElement {
     this.container.appendChild(app.renderer.canvas);
     app.renderer.background.color = hexToNumber(this.settings.backgroundColor);
 
+    console.log(this.container, this.container.clientWidth, this.container.clientHeight);
+
     const viewport = new Viewport({
       events: app.renderer.events,
     });
     this.viewport = viewport;
 
-    viewport
-      .drag({
-        mouseButtons: 'left',
-      })
-      .pinch()
-      .wheel({
-        smooth: 8,
-      })
-      .decelerate({
-        friction: 0.95,
-        minSpeed: 0.1,
-      })
-      .clampZoom({
-        minScale: settings.minZoom,
-        maxScale: settings.maxZoom,
-      });
+    this.updateControls();
 
     app.stage.addChild(viewport);
 
     // =================================
     // brushes
 
-    Promise.all(this.settings.brushes.map(async (kind) => this.loadBrush(kind))).catch(
+    await Promise.all(this.settings.brushes.map(async (kind) => this.loadBrush(kind))).catch(
       (err: unknown) => {
         console.error(err);
       },
@@ -204,6 +200,7 @@ class SketchPaper extends SpBaseElement {
       Object.assign(worldSys.singleton.write(comps.Settings), this.settings);
 
       const [red, green, blue, alpha] = hexToRgba(this.brushColor);
+
       Object.assign(worldSys.singleton.write(comps.Brush), {
         size: this.brushSize,
         red,
@@ -211,6 +208,13 @@ class SketchPaper extends SpBaseElement {
         blue,
         alpha,
         kind: this.brushKind,
+      });
+
+      Object.assign(worldSys.singleton.write(comps.InputSettings), {
+        actionLeftMouse: this.actionLeftMouse,
+        actionMiddleMouse: this.actionMiddleMouse,
+        actionRightMouse: this.actionRightMouse,
+        actionWheel: this.actionWheel,
       });
 
       const zoom = Math.min(window.innerWidth, 1000) / 2000;
@@ -258,8 +262,8 @@ class SketchPaper extends SpBaseElement {
     }
   }
 
-  private handleBrushUpdate(name: string): void {
-    if (name === 'brush-color') {
+  private updateBrush(fieldName: string): void {
+    if (fieldName === 'brush-color') {
       const [red, green, blue, alpha] = hexToRgba(this.brushColor);
       this.emitter.emit('update-brush', {
         red,
@@ -267,23 +271,63 @@ class SketchPaper extends SpBaseElement {
         blue,
         alpha,
       });
-    } else if (name === 'brush-size') {
+    } else if (fieldName === 'brush-size') {
       this.emitter.emit('update-brush', {
         size: this.brushSize,
       });
-    } else if (name === 'brush-kind') {
+    } else if (fieldName === 'brush-kind') {
       this.emitter.emit('update-brush', {
         kind: this.brushKind,
       });
     }
   }
 
-  private handleModeUpdate(): void {
-    if (this.mode === InteractionModeEnum.Pan) {
-      this.viewport?.drag({ mouseButtons: 'left' });
-    } else {
-      this.viewport?.drag({ mouseButtons: 'right' });
+  private updateControls(): void {
+    const mouseButtons = [];
+    if (this.actionLeftMouse === PointerActions.Pan) {
+      mouseButtons.push('left');
     }
+    if (this.actionMiddleMouse === PointerActions.Pan) {
+      mouseButtons.push('middle');
+    }
+    if (this.actionRightMouse === PointerActions.Pan) {
+      mouseButtons.push('right');
+    }
+
+    this.viewport?.drag({
+      mouseButtons: mouseButtons.join('|'),
+      factor: mouseButtons.length === 0 ? 0 : 1,
+      wheel: this.actionWheel === WheelActions.Scroll,
+    });
+
+    this.viewport?.wheel({
+      smooth: 8,
+      wheelZoom: this.actionWheel === WheelActions.Zoom,
+    });
+
+    this.viewport
+      ?.pinch()
+      .decelerate({
+        friction: 0.95,
+        minSpeed: 0.1,
+      })
+      .clampZoom({
+        minScale: this.settings.minZoom,
+        maxScale: this.settings.maxZoom,
+      });
+
+    this.emitter.emit('update-input-settings', {
+      actionLeftMouse: this.actionLeftMouse,
+      actionMiddleMouse: this.actionMiddleMouse,
+      actionRightMouse: this.actionRightMouse,
+      actionWheel: this.actionWheel,
+    });
+
+    // if (this.mode === InteractionModeEnum.Pan) {
+    //   this.viewport?.drag({ mouseButtons: 'left|right' });
+    // } else {
+    //   this.viewport?.drag({ mouseButtons: 'right' });
+    // }
   }
 }
 

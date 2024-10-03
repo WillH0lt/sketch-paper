@@ -9,7 +9,10 @@ require (
 	github.com/zishang520/socket.io/v2 v2.3.0
 )
 
-require github.com/mitchellh/mapstructure v1.5.0 // indirect
+require (
+	github.com/mitchellh/mapstructure v1.5.0 // indirect
+	github.com/shamaton/msgpack/v2 v2.2.2 // indirect
+)
 
 require (
 	github.com/andybalholm/brotli v1.1.0 // indirect
@@ -57,7 +60,7 @@ require (
 	golang.org/x/sys v0.23.0 // indirect
 	golang.org/x/text v0.17.0 // indirect
 	golang.org/x/tools v0.21.1-0.20240508182429-e35e4ccd0d2d // indirect
-	google.golang.org/protobuf v1.33.0 // indirect
+	google.golang.org/protobuf v1.34.2 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 

@@ -13,6 +13,7 @@ import (
 	"github.com/willH0lt/sketch-paper/examples/crayon.town/backend/cleaner/redis"
 	"github.com/willH0lt/sketch-paper/examples/crayon.town/backend/cleaner/storage"
 	"github.com/willH0lt/sketch-paper/examples/crayon.town/backend/shared/models"
+	"google.golang.org/protobuf/proto"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -65,16 +66,17 @@ func run(args *cli.Context) error {
 			continue
 		}
 
-		var segments models.DrawSegments
+		var stroke models.Stroke
 		for _, record := range records {
-			var batch models.DrawSegments
-			if err := batch.UnmarshalBinary([]byte(record)); err != nil {
+			var s models.Stroke
+			if err := proto.Unmarshal([]byte(record), &s); err != nil {
+				log.Error().Err(err).Msg("failed to unmarshal record")
 				continue
 			}
-			segments = append(segments, batch...)
+			stroke.Segments = append(stroke.Segments, s.Segments...)
 		}
 
-		if len(segments) == 0 {
+		if len(stroke.Segments) == 0 {
 			continue
 		}
 
@@ -87,7 +89,7 @@ func run(args *cli.Context) error {
 		}
 
 		pool.Submit(func() {
-			images.Draw(ctx, img, segments)
+			images.Draw(ctx, img, &stroke)
 
 			if err := storage.SaveImage(ctx, imgFileName, img); err != nil {
 				log.Error().Err(err).Msg("failed to save image")

@@ -18,6 +18,10 @@ const coords = defineModel<{
   y: number;
 }>({ required: true });
 
+const emit = defineEmits<{
+  (event: 'update', coords: { x: number; y: number }): void;
+}>();
+
 const blurred = ref(true);
 const text = ref('');
 
@@ -29,6 +33,7 @@ function onInput(event: Event) {
   if (match) {
     coords.value.x = parseInt(match[1]);
     coords.value.y = parseInt(match[2]);
+    emit('update', coords.value);
   }
 }
 

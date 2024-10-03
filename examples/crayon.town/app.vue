@@ -8,43 +8,37 @@
       :brush-color="brush.color"
       :brush-kind="brush.kind"
       :brush-size="15"
-      :interaction-mode="interactionMode"
+      :action-left-mouse="actionLeftMouse"
     ></sketch-paper>
 
     <div class="absolute top-0 left-0 m-2 text-4xl pointer-events-none">🖍️</div>
 
     <div
-      class="absolute bottom-1 left-2 pointer-events-none text-2xl text-white hidden md:block"
+      class="absolute bottom-1 left-2 pointer-events-none text-2xl text-black hidden md:block"
       v-if="peopleHere > 0"
     >
       people here: {{ peopleHere }}
     </div>
 
-    <div
-      class="absolute flex w-full bottom-2 justify-center overflow-hidden pointer-events-none z-10"
-    >
+    <div class="absolute flex w-full bottom-0 justify-center overflow-hidden pointer-events-none">
       <div class="flex items-end h-screen w-full max-w-[400px]">
         <palette v-model="brush"></palette>
       </div>
     </div>
 
-    <div class="absolute bottom-1 right-1 pointer-events-none text-2xl text-white hidden md:block">
-      <coordinates v-model="coords"></coordinates>
+    <div class="absolute bottom-1 right-1 pointer-events-none text-2xl text-black hidden md:block">
+      <coordinates v-model="coords" @update="handleCoordinatesUpdate"></coordinates>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import '@sketch-paper/core';
-import type {
-  DrawSegment,
-  SketchPaper,
-  SpDrawEvent,
-  SpMoveEvent,
-  SpTileLoadEvent,
-} from '@sketch-paper/core';
-import { BrushKindEnum, InteractionModeEnum } from '@sketch-paper/core';
+import type { SketchPaper, SpDrawEvent, SpMoveEvent, SpTileLoadEvent } from '@sketch-paper/core';
+import { BrushKindEnum, PointerActions } from '@sketch-paper/core';
 import { io } from 'socket.io-client';
+
+import { compress, decompress } from './utils';
 
 const router = useRouter();
 
@@ -59,10 +53,8 @@ const coords = ref({
   y: 0,
 });
 
-const interactionMode = computed(() => {
-  return brush.value.kind === BrushKindEnum.None
-    ? InteractionModeEnum.Pan
-    : InteractionModeEnum.Draw;
+const actionLeftMouse = computed(() => {
+  return brush.value.kind === BrushKindEnum.None ? PointerActions.Pan : PointerActions.Draw;
 });
 
 const path = router.currentRoute.value.path;
@@ -97,11 +89,6 @@ onMounted(async () => {
   });
 });
 
-onUnmounted(() => {
-  socket?.close();
-  clearInterval(interval);
-});
-
 const socket = import.meta.client
   ? io('http://localhost:8087', {
       transports: ['websocket'],
@@ -114,19 +101,19 @@ function handleSpMove(event: SpMoveEvent) {
 }
 
 function handleSpDraw(event: SpDrawEvent) {
-  socket?.emit('draw', event.detail);
+  socket?.emit('draw', compress(event.detail));
 }
 
 function handleSpTileLoad(event: SpTileLoadEvent) {
   socket?.emit('tile-load', event.detail);
 }
 
-watchEffect(() => {
+function handleCoordinatesUpdate() {
   sketchPaperRef.value?.move(coords.value.x, -coords.value.y);
-});
+}
 
-socket?.on('draw', (segments: DrawSegment[]) => {
-  sketchPaperRef.value?.draw(segments);
+socket?.on('draw', (data: string) => {
+  sketchPaperRef.value?.draw(decompress(data));
 });
 
 socket?.on('join', (data: number) => {
@@ -135,5 +122,10 @@ socket?.on('join', (data: number) => {
 
 socket?.on('leave', (data: number) => {
   peopleHere.value = data;
+});
+
+onUnmounted(() => {
+  socket?.close();
+  clearInterval(interval);
 });
 </script>

@@ -2,8 +2,6 @@ import { component, field } from '@lastolivegames/becsy';
 
 @component
 class Input {
-  @field.float32.vector(2) public declare pointerClient: [number, number];
-
   @field.float32.vector(2) public declare pointerWorld: [number, number];
 
   @field.boolean public declare pointerDown: boolean;
@@ -11,16 +9,6 @@ class Input {
   @field.boolean public declare pointerDownTrigger: boolean;
 
   @field.boolean public declare pointerUpTrigger: boolean;
-
-  @field.boolean public declare pointerBeingDragged: boolean;
-
-  @field.boolean public declare pointerBeingDraggedTrigger: boolean;
-
-  @field.float32.vector(2) public declare dragStart: [number, number];
-
-  @field.boolean public declare didHaveMultiplePointersDown: boolean;
-
-  @field.float32 public declare pointerTravelDistance: number;
 
   @field.boolean public declare aDown: boolean;
 
@@ -221,10 +209,6 @@ class Input {
   @field.boolean public declare arrowdownDown: boolean;
 
   @field.boolean public declare arrowdownDownTrigger: boolean;
-
-  @field.boolean public declare rightMouseDown: boolean;
-
-  @field.boolean public declare rightMouseDownTrigger: boolean;
 }
 
 export default Input;

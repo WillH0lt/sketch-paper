@@ -5,9 +5,23 @@ import type { EventMap } from 'strict-event-emitter';
 export { BrushKindEnum } from '@sketch-paper/brushes';
 export type { DrawSegment } from '@sketch-paper/brushes';
 
-export enum InteractionModeEnum {
-  Draw = 'draw',
+export enum PointerActions {
+  None = 'none',
   Pan = 'pan',
+  Draw = 'draw',
+}
+
+export enum WheelActions {
+  None = 'none',
+  Zoom = 'zoom',
+  Scroll = 'scroll',
+}
+
+export interface InputSettings {
+  actionLeftMouse: PointerActions;
+  actionMiddleMouse: PointerActions;
+  actionRightMouse: PointerActions;
+  actionWheel: WheelActions;
 }
 
 export interface Brush {
@@ -57,6 +71,7 @@ export interface Tile {
 
 export interface Events extends EventMap {
   'update-brush': [Partial<Brush>];
+  'update-input-settings': [InputSettings];
   'draw-outgoing': [DrawSegment[]];
   'draw-incoming': [DrawSegment[]];
   'tile-load': [Tile];
