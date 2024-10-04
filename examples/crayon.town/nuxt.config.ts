@@ -17,6 +17,24 @@ export default defineNuxtConfig({
     },
   },
   modules: ['@nuxtjs/tailwindcss', 'nuxt-svgo'],
+  svgo: {
+    defaultImport: 'component',
+    svgoConfig: {
+      plugins: [
+        {
+          name: 'preset-default',
+          params: {
+            overrides: {
+              inlineStyles: {
+                removeMatchedSelectors: false,
+              },
+              minifyStyles: false,
+            },
+          },
+        },
+      ],
+    },
+  },
   vue: {
     compilerOptions: {
       isCustomElement: (tag: string) => tag.startsWith('sketch-paper'),

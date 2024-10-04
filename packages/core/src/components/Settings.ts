@@ -21,6 +21,10 @@ class Settings {
   @field.dynamicString(7) public declare backgroundColor: string;
 
   @field.boolean public declare allowUndo: boolean;
+
+  @field.uint8 public declare tileLoadingConcurrency: number;
+
+  @field.uint8 public declare maxTiles: number;
 }
 
 export default Settings;

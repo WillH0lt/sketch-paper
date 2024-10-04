@@ -11,7 +11,9 @@
       :action-left-mouse="actionLeftMouse"
     ></sketch-paper>
 
-    <div class="absolute top-0 left-0 m-2 text-4xl pointer-events-none">🖍️</div>
+    <div class="absolute top-0 left-0 m-4 text-4xl pointer-events-none">
+      <SvgCrayonLogo class="scale-150" />
+    </div>
 
     <div
       class="absolute bottom-1 left-2 pointer-events-none text-2xl text-black hidden md:block"
@@ -34,11 +36,20 @@
 
 <script setup lang="ts">
 import '@sketch-paper/core';
-import type { SketchPaper, SpDrawEvent, SpMoveEvent, SpTileLoadEvent } from '@sketch-paper/core';
+import type {
+  DrawSegment,
+  SketchPaper,
+  SpDrawEvent,
+  SpMoveEvent,
+  SpTileLoadEvent,
+} from '@sketch-paper/core';
 import { BrushKindEnum, PointerActions } from '@sketch-paper/core';
 import { io } from 'socket.io-client';
+import SvgCrayonLogo from '~/assets/svg/crayonLogo.svg';
 
-import { compress, decompress } from './utils';
+import { models } from './models.js';
+import StrokeBuffer from './strokeBuffer.js';
+import StrokeReplayer from './strokeReplayer.js';
 
 const router = useRouter();
 
@@ -77,23 +88,35 @@ onMounted(async () => {
     maxZoom: 10,
     startX: coords.value.x,
     startY: -coords.value.y,
-    tileWidth: 2048,
-    tileHeight: 2048,
     tileCountX: 0, // 0 means infinite
     tileCountY: 0, // 0 means infinite
     baseUrl: 'https://storage.googleapis.com/sketch-paper-public',
-    baseColor: '#C2BCB0',
-    backgroundColor: '#FFFFFF',
     allowUndo: false,
+    maxTiles: 10,
     brushes: [BrushKindEnum.Crayon],
   });
 });
 
+const strokeBuffer = new StrokeBuffer(500);
+const strokeReplayer = new StrokeReplayer(500);
 const socket = import.meta.client
   ? io('http://localhost:8087', {
       transports: ['websocket'],
     })
   : null;
+
+strokeBuffer.onData((segments: DrawSegment[]) => {
+  const stroke = models.Stroke.fromObject({ segments });
+  const bytes = stroke.serializeBinary();
+
+  // TODO send bytes directly to server instead of base64 encoding
+  const data = window.btoa(String.fromCharCode(...bytes));
+  socket?.emit('draw', data);
+});
+
+strokeReplayer.onData((segments: DrawSegment[]) => {
+  sketchPaperRef.value?.draw(segments);
+});
 
 function handleSpMove(event: SpMoveEvent) {
   coords.value.x = event.detail.x;
@@ -101,7 +124,7 @@ function handleSpMove(event: SpMoveEvent) {
 }
 
 function handleSpDraw(event: SpDrawEvent) {
-  socket?.emit('draw', compress(event.detail));
+  strokeBuffer.add(event.detail);
 }
 
 function handleSpTileLoad(event: SpTileLoadEvent) {
@@ -113,7 +136,15 @@ function handleCoordinatesUpdate() {
 }
 
 socket?.on('draw', (data: string) => {
-  sketchPaperRef.value?.draw(decompress(data));
+  const bytes = new Uint8Array(
+    window
+      .atob(data)
+      .split('')
+      .map((c) => c.charCodeAt(0)),
+  );
+
+  const stroke = models.Stroke.deserializeBinary(bytes);
+  strokeReplayer.add(stroke.segments);
 });
 
 socket?.on('join', (data: number) => {
@@ -127,5 +158,7 @@ socket?.on('leave', (data: number) => {
 onUnmounted(() => {
   socket?.close();
   clearInterval(interval);
+  strokeBuffer.destroy();
+  strokeReplayer.destroy();
 });
 </script>

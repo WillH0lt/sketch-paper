@@ -11,10 +11,6 @@ class Tile {
 
   @field.int32.vector(2) public declare index: [number, number];
 
-  // @field.dynamicString(512) declare public image: string;
-
-  // @field.dynamicString(36) declare public label: string;
-
   @field.boolean public declare loading: boolean;
 }
 

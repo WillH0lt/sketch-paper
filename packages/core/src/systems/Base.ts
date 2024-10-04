@@ -1,3 +1,4 @@
+import type { Entity } from '@lastolivegames/becsy';
 import { System } from '@lastolivegames/becsy';
 
 import * as comps from '../components/index.js';
@@ -24,6 +25,13 @@ class BaseSystem extends System {
 
   protected createSnapshot(): void {
     this.createEntity(comps.Snapshot, {}, comps.Undoable);
+  }
+
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
+  protected deleteEntity(entity: Entity): void {
+    if (!entity.has(comps.ToBeDeleted)) {
+      entity.add(comps.ToBeDeleted);
+    }
   }
 }
 

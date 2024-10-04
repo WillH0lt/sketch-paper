@@ -3,7 +3,7 @@
     <div class="fixed inset-0" v-if="colorPickerVisible" @click="colorPickerVisible = false"></div>
 
     <div
-      class="absolute bottom-12 left-0 right-0 h-72 bg-[#cfcfc6] rounded-t-2xl drop-shadow-lg transition"
+      class="absolute bottom-12 left-0 right-0 h-72 bg-[#dbdbd5] rounded-t-2xl drop-shadow-lg transition"
       :class="{
         'translate-y-[150%]': !colorPickerVisible,
         'translate-y-0': colorPickerVisible,
@@ -12,18 +12,26 @@
       <div ref="colorPickerRef" class="w-full flex justify-center mt-10"></div>
     </div>
 
-    <div class="flex flex-1 pt-0.5 relative h-16 bg-white rounded-t-xl drop-shadow-2xl">
-      <div class="cursor-pointer" v-for="(color, index) in colors" @click="handleColorClick(index)">
-        <img
-          class="hover:-translate-y-8 -translate-y-2 transition-transform px-2"
+    <div class="flex flex-1 pt-1 relative h-16 bg-white rounded-t-xl drop-shadow-2xl">
+      <div
+        class="w-full cursor-pointer group"
+        v-for="(_, index) in colors"
+        @click="handleColorClick(index)"
+      >
+        <SvgCrayon
+          class="w-6 mx-auto group-hover:-translate-y-8 transition-transform"
           :class="{
             '-translate-y-8': brush.kind === BrushKindEnum.Crayon && index === selectedIndex,
+            'dark-wax': luminance(colors[index]) < 50,
+            'bright-wax': luminance(colors[index]) > 175,
           }"
-          src="/crayon.png"
+          :style="{
+            fill: colors[index],
+          }"
         />
       </div>
 
-      <div class="flex items-center justify-center w-24" @click="handlePointerClick">
+      <div class="flex items-center justify-center mx-1" @click="handlePointerClick">
         <div
           class="flex items-center justify-center w-10 h-10 rounded-xl cursor-pointer transition-colors"
           :class="{
@@ -31,8 +39,8 @@
             'hover:bg-gray': brush.kind !== BrushKindEnum.None,
           }"
         >
-          <IconPointer
-            class="text-3xl m-auto stroke-[#231f20] transition-colors"
+          <SvgPointer
+            class="w-full px-2 m-auto stroke-[#231f20] transition-colors"
             :class="{
               'stroke-[#004015]': brush.kind === BrushKindEnum.None,
             }"
@@ -40,7 +48,7 @@
         </div>
       </div>
 
-      <div class="flex items-center justify-center w-24">
+      <div class="flex items-center justify-center mx-1 mr-3">
         <div
           class="flex items-center justify-center w-10 h-10 rounded-xl cursor-pointer transition-colors"
           :class="{
@@ -65,14 +73,15 @@
 import iro from '@jaames/iro';
 
 import { BrushKindEnum } from '@sketch-paper/core';
-import IconPointer from '~/assets/icons/pointer.svg';
+import SvgCrayon from '~/assets/svg/crayon.svg';
+import SvgPointer from '~/assets/svg/pointer.svg';
 
 const brush = defineModel<{
   color: string;
   kind: BrushKindEnum;
 }>({ required: true });
 
-const colors = ref<[string, string, string, string]>(['#FF0000', '#FF7F00', '#FFFF00', '#00FF00']);
+const colors = ref<[string, string, string, string]>(['#FF0000', '#FF7F00', '#429EFF', '#000000']);
 const colorPickerVisible = ref(false);
 const colorPickerRef = ref<HTMLElement>();
 const selectedIndex = ref(0);
@@ -96,6 +105,15 @@ function handleColorPickerClick() {
   brush.value.kind = BrushKindEnum.Crayon;
 }
 
+function luminance(color: string) {
+  const hex = color.replace('#', '');
+  const r = parseInt(hex.substr(0, 2), 16);
+  const g = parseInt(hex.substr(2, 2), 16);
+  const b = parseInt(hex.substr(4, 2), 16);
+
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
 watch(
   colors,
   (colors) => {
@@ -107,7 +125,7 @@ watch(
 onMounted(() => {
   if (!import.meta.client) return;
 
-  const savedColors = JSON.parse(localStorage.getItem('colors') || '');
+  const savedColors = JSON.parse(localStorage.getItem('colors') || '[]');
   if (Array.isArray(savedColors) && savedColors.length >= 4) {
     colors.value = savedColors.slice(0, 4) as [string, string, string, string];
   }

@@ -46,6 +46,8 @@ export interface Settings {
   baseColor: string;
   backgroundColor: string;
   allowUndo: boolean;
+  tileLoadingConcurrency: number;
+  maxTiles: number;
   brushes: Exclude<BrushKindEnum, BrushKindEnum.None>[];
 }
 
@@ -62,6 +64,8 @@ export const defaultSettings: Settings = {
   baseColor: '#C2BCB0',
   backgroundColor: '#FFFFFF',
   allowUndo: true,
+  tileLoadingConcurrency: 3,
+  maxTiles: 20,
   brushes: [BrushKindEnum.Crayon],
 };
 

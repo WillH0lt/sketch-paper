@@ -85,8 +85,9 @@ class SketchTileHandler extends SketchBase {
   }
 
   public execute(): void {
-    // check if tiles need to be added
+    // check if tiles need to be added/removed
     this.addTilesInView();
+    this.unloadFarAwayTiles();
 
     // handle added tiles
     for (const tileEntity of this.tiles.added) {
@@ -122,18 +123,17 @@ class SketchTileHandler extends SketchBase {
       this.applyImageToTile(tileEntity);
     }
 
-    // // remove tile sprites
-    // if (this.tiles.removed.length) {
-    //   this.accessRecentlyDeletedData(true);
-    // }
-    // for (const tileEntity of this.tiles.removed) {
-    //   const pixiTile = this.getPixiTile(tileEntity);
-    //   if (!pixiTile) continue;
-    //   this.viewport.removeChild(pixiTile);
-    //   pixiTile.destroy({
-    //     children: true,
-    //   });
-    // }
+    // remove tile sprites
+    if (this.tiles.removed.length) {
+      this.accessRecentlyDeletedData(true);
+    }
+    for (const tileEntity of this.tiles.removed) {
+      const sprite = this.getTileSprite(tileEntity);
+      if (!sprite) continue;
+
+      this.viewport.removeChild(sprite);
+      sprite.destroy(true);
+    }
   }
 
   private addTilesInView(): void {
@@ -141,7 +141,7 @@ class SketchTileHandler extends SketchBase {
       (tileEntity) => tileEntity.read(comps.Tile).loading,
     );
 
-    if (loadingTileEntities.length > 3) return;
+    if (loadingTileEntities.length > this.settings.tileLoadingConcurrency) return;
 
     const { tileCountX, tileCountY, tileWidth, tileHeight } = this.settings;
 
@@ -183,6 +183,36 @@ class SketchTileHandler extends SketchBase {
 
         this.applyImageToTile(sourceEntity.read(comps.TileSource).tiles[0]);
       }
+    }
+  }
+
+  private unloadFarAwayTiles(): void {
+    if (this.tiles.current.length <= this.settings.maxTiles) return;
+
+    const position = this.viewport.center;
+
+    // cant sort in place with becsy, have to create a seperate array
+    const sortedTiles = this.tiles.current
+      .map((tileEntity: Entity) => {
+        const tile = tileEntity.read(comps.Tile);
+        return {
+          id: `${tile.index[0]}_${tile.index[1]}`,
+          distanceSq: (position.x - tile.position[0]) ** 2 + (position.y - tile.position[1]) ** 2,
+        };
+      })
+      .sort((a, b) => a.distanceSq - b.distanceSq);
+
+    for (let i = this.settings.maxTiles; i < sortedTiles.length; i++) {
+      const [x, y] = sortedTiles[i].id.split('_').map(Number);
+      const tileEntity = this.tiles.current.find((tileEntity2: Entity) => {
+        const tile = tileEntity2.read(comps.Tile);
+        return tile.index[0] === x && tile.index[1] === y;
+      });
+
+      if (!tileEntity) continue;
+
+      this.deleteEntity(tileEntity.read(comps.Tile).source);
+      this.deleteEntity(tileEntity);
     }
   }
 }
