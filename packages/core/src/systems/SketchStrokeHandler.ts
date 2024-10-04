@@ -9,6 +9,10 @@ import type { BrushKindEnum, DrawSegment, Events } from '../types.js';
 import SketchBase from './SketchBase.js';
 import { deleteEntity } from './common.js';
 
+function lenSq(segment: DrawSegment): number {
+  return (segment.endX - segment.startX) ** 2 + (segment.endY - segment.startY) ** 2;
+}
+
 @system
 class SketchStrokeHandler extends SketchBase {
   public readonly app!: PIXI.Application;
@@ -124,6 +128,8 @@ class SketchStrokeHandler extends SketchBase {
           size: this.brush.size,
           kind: this.brush.kind,
         };
+
+        if (lenSq(segment) > 100_000) continue;
 
         brush.draw(segment, tileSprite.texture);
         segments.push(segment);

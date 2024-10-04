@@ -14,12 +14,12 @@
 
 <script setup lang="ts">
 const coords = defineModel<{
-  x: number;
-  y: number;
+  x: bigint;
+  y: bigint;
 }>({ required: true });
 
 const emit = defineEmits<{
-  (event: 'update', coords: { x: number; y: number }): void;
+  (event: 'update', coords: { x: bigint; y: bigint }): void;
 }>();
 
 const blurred = ref(true);
@@ -31,8 +31,8 @@ function onInput(event: Event) {
   const match = c.match(/\(?(-?\d+), ?(-?\d+)\)?/);
 
   if (match) {
-    coords.value.x = parseInt(match[1]);
-    coords.value.y = parseInt(match[2]);
+    coords.value.x = BigInt(match[1]);
+    coords.value.y = BigInt(match[2]);
     emit('update', coords.value);
   }
 }
@@ -44,7 +44,7 @@ function onEnter(event: KeyboardEvent) {
 
 watchEffect(() => {
   if (blurred.value) {
-    text.value = `(${Math.round(coords.value.x)}, ${Math.round(coords.value.y)})`;
+    text.value = `(${coords.value.x}, ${coords.value.y})`;
   }
 });
 </script>

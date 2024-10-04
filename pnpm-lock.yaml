@@ -86,6 +86,9 @@ importers:
       lit:
         specifier: ^3.2.0
         version: 3.2.0
+      lodash.throttle:
+        specifier: ^4.1.1
+        version: 4.1.1
       nuxt:
         specifier: ^3.13.0
         version: 3.13.2(@types/node@22.5.5)(eslint@8.57.1)(typescript@5.4.2)(vite@5.4.6)
@@ -108,6 +111,9 @@ importers:
       '@types/google-protobuf':
         specifier: ^3.15.12
         version: 3.15.12
+      '@types/lodash.throttle':
+        specifier: ^4.1.9
+        version: 4.1.9
       protoc-gen-ts:
         specifier: ^0.8.7
         version: 0.8.7
@@ -3506,6 +3512,12 @@ packages:
 
   /@types/json5@0.0.29:
     resolution: {integrity: sha512-dRLjCWHYg4oaA77cxO64oO+7JwCwnIzkZPdrrC71jQmQtlhM556pwKo5bUzqvZndkVbeFLIIi+9TC40JNF5hNQ==}
+    dev: true
+
+  /@types/lodash.throttle@4.1.9:
+    resolution: {integrity: sha512-PCPVfpfueguWZQB7pJQK890F2scYKoDUL3iM522AptHWn7d5NQmeS/LTEHIcLr5PaTzl3dK2Z0xSUHHTHwaL5g==}
+    dependencies:
+      '@types/lodash': 4.17.7
     dev: true
 
   /@types/lodash@4.17.7:
@@ -9456,6 +9468,10 @@ packages:
   /lodash.startcase@4.4.0:
     resolution: {integrity: sha512-+WKqsK294HMSc2jEbNgpHpd0JfIBhp7rEV4aqXWqFr6AlXov+SlcgB1Fv01y2kGe3Gc8nMW7VA0SrGuSkRfIEg==}
     dev: true
+
+  /lodash.throttle@4.1.1:
+    resolution: {integrity: sha512-wIkUCfVKpVsWo3JSZlc+8MB5it+2AN5W8J7YVMST30UrvcQNZ1Okbj+rbVniijTWE6FGYy4XJq/rHkas8qJMLQ==}
+    dev: false
 
   /lodash.uniq@4.5.0:
     resolution: {integrity: sha512-xfBaXQd9ryd9dlSDvnvI0lvxfLJlYAZzXomUYzLKtUeOQvOP5piqAWuGtrhWeqaXK9hhoM/iyJc5AV+XfsX3HQ==}

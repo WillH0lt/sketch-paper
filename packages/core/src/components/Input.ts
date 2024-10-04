@@ -2,7 +2,7 @@ import { component, field } from '@lastolivegames/becsy';
 
 @component
 class Input {
-  @field.float32.vector(2) public declare pointerWorld: [number, number];
+  @field.int32.vector(2) public declare pointerWorld: [number, number];
 
   @field.boolean public declare pointerDown: boolean;
 

@@ -9,15 +9,19 @@ uniform vec4 uBrushColor;
 uniform vec2 uPosition;
 uniform vec2 uLastPosition;
 
+const float TWO_PI = 6.28318530718;
+
 vec2 rotateUV(vec2 uv, vec2 mid, float rotation) {
-    float s = sin(rotation);
-    float c = cos(rotation);
+    float r = mod(rotation, TWO_PI);
+    float s = sin(r);
+    float c = cos(r);
     mat2 rotationMatrix = mat2(c, -s, s, c);
     return mid + rotationMatrix * (uv - mid);
 }
 
 float rand(float co){
-    return fract(sin(co * 12.9898) * 43758.5453);
+    float r = mod(co * 12.9898, TWO_PI);
+    return fract(sin(r) * 43758.5453);
 }
 
 void main() {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"math"
 
 	mapstructure "github.com/mitchellh/mapstructure"
 	"github.com/willH0lt/sketch-paper/examples/crayon.town/backend/shared/models"
@@ -71,6 +72,10 @@ func handleEventDraw(client *socketio.Socket, data any) error {
 	var stroke models.Stroke
 	if err := proto.Unmarshal(byteData, &stroke); err != nil {
 		return fmt.Errorf("error unmarshalling stroke: %w", err)
+	}
+
+	if err := verifyStroke(&stroke); err != nil {
+		return err
 	}
 
 	// group by tileX and tileY
@@ -168,4 +173,27 @@ func (r RoomController) nClients() int {
 	}
 
 	return size
+}
+
+func verifyStroke(stroke *models.Stroke) error {
+	if len(stroke.Segments) == 0 {
+		return fmt.Errorf("stroke has no segments")
+	}
+
+	if len(stroke.Segments) > 100 {
+		return fmt.Errorf("stroke has too many segments")
+	}
+
+	for _, segment := range stroke.Segments {
+		lengthSq := powInt(segment.EndX-segment.StartX, 2) + powInt(segment.EndY-segment.StartY, 2)
+		if lengthSq > 1e6 {
+			return fmt.Errorf("segment is too long")
+		}
+	}
+
+	return nil
+}
+
+func powInt(x, y int32) int32 {
+	return int32(math.Pow(float64(x), float64(y)))
 }

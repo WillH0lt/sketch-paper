@@ -5,10 +5,14 @@ import type { DrawSegment } from '../types.js';
 import { BrushKindEnum } from '../types.js';
 import { CrayonShader } from './CrayonShader.js';
 
+function distance(x1: number, y1: number, x2: number, y2: number): number {
+  return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+}
+
 class CrayonBrush extends BaseBrush {
   public static kind = BrushKindEnum.Crayon;
 
-  private lastPosition: [number, number] | null = null;
+  private readonly lastPositionMap = new Map<string, [number, number]>(); // : [number, number] | null = null;
 
   private shader: CrayonShader | null = null;
 
@@ -41,24 +45,46 @@ class CrayonBrush extends BaseBrush {
     });
   }
 
-  public onStrokeEnd(): void {
-    this.lastPosition = null;
-  }
+  // public onStrokeEnd(): void {
+  // this.lastPosition = null;
+  // }
 
   public draw(segment: DrawSegment, texture: PIXI.Texture): void {
     if (!this.brush || !this.shader) return;
 
+    const key = `${segment.tileX}_${segment.tileY}`;
+
+    let lastPosition = this.lastPositionMap.get(key);
+    if (!lastPosition) {
+      lastPosition = [segment.startX, segment.startY];
+      this.lastPositionMap.set(key, lastPosition);
+    }
+
+    // this.lastPosition = [segment.startX, segment.startY];
+    // if (!this.lastPosition) {
+    // }
+    if (distance(segment.startX, segment.startY, lastPosition[0], lastPosition[1]) > segment.size) {
+      // lastPosition = [segment.startX, segment.startY];
+      lastPosition[0] = segment.startX;
+      lastPosition[1] = segment.startY;
+    }
+
     this.shader.setBrushColor([segment.red, segment.green, segment.blue, segment.alpha]);
 
-    const distance = Math.sqrt(
-      (segment.endX - segment.startX) ** 2 + (segment.endY - segment.startY) ** 2,
-    );
+    let dist = distance(segment.startX, segment.startY, segment.endX, segment.endY);
 
-    let d = 0.1;
-    if (segment.size > 25) {
-      d = 0.05;
+    const d = 0.1;
+    // if (segment.size > 25) {
+    //   d = 0.05;
+    // }
+
+    const spacing = d * segment.size;
+    if (dist < spacing) {
+      // use the last position to calculate the distance if the distance is too small
+      dist = distance(segment.startX, segment.startY, lastPosition[0], lastPosition[1]);
     }
-    const nPoints = Math.floor(distance / (d * segment.size));
+
+    const nPoints = Math.floor(dist / spacing);
 
     const points = [];
     for (let i = 0; i < nPoints; i++) {
@@ -72,13 +98,10 @@ class CrayonBrush extends BaseBrush {
       const x = point[0];
       const y = point[1];
 
-      if (!this.lastPosition) {
-        this.lastPosition = [x, y];
-        continue;
-      }
-      this.shader.setLastPosition(this.lastPosition);
+      this.shader.setLastPosition(lastPosition);
       this.shader.setPosition([x, y]);
-      this.lastPosition = [x, y];
+      lastPosition[0] = x;
+      lastPosition[1] = y;
 
       this.transform
         .identity()

@@ -15,6 +15,19 @@ import type { DrawSegment, Events, Settings, Tile } from '../../types.js';
 import { BrushKindEnum, PointerActions, WheelActions, defaultSettings } from '../../types.js';
 import SpBaseElement from '../base/sketchPaperBase.js';
 
+const maxWorldCoord = 2 ** 31;
+function getBoundedCoord(v: number): number {
+  let boundedV = v;
+  if (Math.abs(v) > maxWorldCoord) {
+    boundedV = -1 * Math.sign(v) * maxWorldCoord + ((v - maxWorldCoord) % (2 * maxWorldCoord));
+  }
+
+  return boundedV;
+}
+function getBoundedCoords(x: number, y: number): [number, number] {
+  return [getBoundedCoord(x), getBoundedCoord(y)];
+}
+
 @customElement('sketch-paper')
 class SketchPaper extends SpBaseElement {
   public static styles = css`
@@ -83,7 +96,8 @@ class SketchPaper extends SpBaseElement {
   }
 
   public move(x: number, y: number): void {
-    this.viewport?.moveCenter(x, y);
+    const [boundedX, boundedY] = getBoundedCoords(x, y);
+    this.viewport?.moveCenter(boundedX, boundedY);
   }
 
   public async initialize(settings: Partial<Settings>): Promise<void> {
@@ -141,7 +155,14 @@ class SketchPaper extends SpBaseElement {
 
     viewport.on('moved', () => {
       const { x, y } = viewport.center;
-      this.emit('sp-move', { detail: { x: Math.round(x), y: Math.round(y) } });
+
+      const [boundedX, boundedY] = getBoundedCoords(x, y);
+
+      if (x !== boundedX || y !== boundedY) {
+        viewport.moveCenter(boundedX, boundedY);
+      }
+
+      this.emit('sp-move', { detail: { x: Math.round(boundedX), y: Math.round(boundedY) } });
     });
 
     this.emitter.on('draw-outgoing', (segments: DrawSegment[]) => {
@@ -219,7 +240,8 @@ class SketchPaper extends SpBaseElement {
 
       const zoom = Math.min(window.innerWidth, 1000) / 2000;
       viewport.setZoom(zoom, true);
-      viewport.moveCenter(this.settings.startX, this.settings.startY);
+      const [startX, startY] = getBoundedCoords(this.settings.startX, this.settings.startY);
+      viewport.moveCenter(startX, startY);
     });
 
     // =================================

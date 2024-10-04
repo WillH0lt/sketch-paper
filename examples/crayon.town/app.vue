@@ -44,12 +44,14 @@ import type {
   SpTileLoadEvent,
 } from '@sketch-paper/core';
 import { BrushKindEnum, PointerActions } from '@sketch-paper/core';
+import throttle from 'lodash.throttle';
 import { io } from 'socket.io-client';
 import SvgCrayonLogo from '~/assets/svg/crayonLogo.svg';
 
 import { models } from './models.js';
 import StrokeBuffer from './strokeBuffer.js';
 import StrokeReplayer from './strokeReplayer.js';
+import { getBoundedCoords } from './utils.js';
 
 const router = useRouter();
 
@@ -60,8 +62,15 @@ const brush = ref({
 });
 const peopleHere = ref(0);
 const coords = ref({
-  x: 0,
-  y: 0,
+  x: BigInt(0),
+  y: BigInt(0),
+});
+
+// offsets to give the illusion of an infinite canvas, sketch-paper goes up to 2^32 pixels
+// the offsets is the difference between the actual coordinates and the bounded coordinates
+const coordsOffset = ref({
+  x: BigInt(0),
+  y: BigInt(0),
 });
 
 const actionLeftMouse = computed(() => {
@@ -70,24 +79,30 @@ const actionLeftMouse = computed(() => {
 
 const path = router.currentRoute.value.path;
 if (path.includes('@')) {
-  const [startX, startY] = path.split('@')[1].split(',').map(Number);
-  if (!isNaN(startX) && !isNaN(startY)) {
+  try {
+    const [startX, startY] = path.split('@')[1].split(',').map(BigInt);
     coords.value.x = startX;
     coords.value.y = startY;
+  } catch {
+    // parsing error
   }
 }
+
+const [startX, startY] = getBoundedCoords(coords.value.x, coords.value.y);
+coordsOffset.value.x = coords.value.x - BigInt(startX);
+coordsOffset.value.y = coords.value.y - BigInt(startY);
 
 let interval: NodeJS.Timeout;
 onMounted(async () => {
   interval = setInterval(() => {
-    router.replace(`@${Math.round(coords.value.x)},${Math.round(coords.value.y)}`);
+    router.replace(`@${coords.value.x},${coords.value.y}`);
   }, 1000);
 
   await sketchPaperRef.value?.initialize({
     minZoom: 1,
     maxZoom: 10,
-    startX: coords.value.x,
-    startY: -coords.value.y,
+    startX,
+    startY: -startY,
     tileCountX: 0, // 0 means infinite
     tileCountY: 0, // 0 means infinite
     baseUrl: 'https://storage.googleapis.com/sketch-paper-public',
@@ -119,8 +134,8 @@ strokeReplayer.onData((segments: DrawSegment[]) => {
 });
 
 function handleSpMove(event: SpMoveEvent) {
-  coords.value.x = event.detail.x;
-  coords.value.y = -event.detail.y;
+  coords.value.x = coordsOffset.value.x + BigInt(event.detail.x);
+  coords.value.y = coordsOffset.value.y + BigInt(-event.detail.y);
 }
 
 function handleSpDraw(event: SpDrawEvent) {
@@ -131,9 +146,10 @@ function handleSpTileLoad(event: SpTileLoadEvent) {
   socket?.emit('tile-load', event.detail);
 }
 
-function handleCoordinatesUpdate() {
-  sketchPaperRef.value?.move(coords.value.x, -coords.value.y);
-}
+const handleCoordinatesUpdate = throttle(() => {
+  const [x, y] = getBoundedCoords(coords.value.x, coords.value.y);
+  sketchPaperRef.value?.move(x, -y);
+}, 500);
 
 socket?.on('draw', (data: string) => {
   const bytes = new Uint8Array(

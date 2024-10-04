@@ -42,6 +42,9 @@ async function setupSketchCanvas(element: HTMLElement): Promise<void> {
 
   viewport.setZoom(1, true);
 
+  const shift = 0; // 2 ** 32 - 1;
+  viewport.moveCenter(shift, shift);
+
   app.stage.addChild(viewport);
 
   // ===========================================================
@@ -65,6 +68,7 @@ async function setupSketchCanvas(element: HTMLElement): Promise<void> {
   // //
 
   const sprite = new PIXI.Sprite(texture);
+  sprite.position.set(shift, shift);
   viewport.addChild(sprite);
 
   // ===========================================================
@@ -84,7 +88,7 @@ async function setupSketchCanvas(element: HTMLElement): Promise<void> {
   viewport.on('pointermove', (event) => {
     if (!pointerDown) return;
 
-    const curr = sprite.toLocal(event.global);
+    const curr = viewport.toLocal(event.global);
 
     if (!last) {
       last = curr;
@@ -93,14 +97,14 @@ async function setupSketchCanvas(element: HTMLElement): Promise<void> {
 
     brush.draw(
       {
-        tileX: 0,
-        tileY: 0,
+        tileX: sprite.x,
+        tileY: sprite.y,
         startX: last.x,
         startY: last.y,
         endX: curr.x,
         endY: curr.y,
         red: 0,
-        green: 255,
+        green: 0,
         blue: 0,
         alpha: 255,
         size: 10,

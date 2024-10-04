@@ -52,7 +52,7 @@ class SketchTileHandler extends SketchBase {
         }).catch(() => {
           // supressing 404 errors
         }),
-      )) as PIXI.Texture | { error: unknown };
+      )) as PIXI.Texture | undefined;
 
       if (texture instanceof PIXI.Texture) {
         sprite.texture = texture;
@@ -145,10 +145,14 @@ class SketchTileHandler extends SketchBase {
 
     const { tileCountX, tileCountY, tileWidth, tileHeight } = this.settings;
 
-    const minX = tileCountX === 0 ? -Infinity : 0;
-    const minY = tileCountY === 0 ? Infinity : tileCountY - 1;
-    const maxX = tileCountX === 0 ? Infinity : tileCountX - 1;
-    const maxY = tileCountY === 0 ? -Infinity : 0;
+    // largest possible values without causing overflow
+    const infX = Math.floor(2 ** 31 / tileWidth);
+    const infY = Math.floor(2 ** 31 / tileHeight);
+
+    const minX = tileCountX === 0 ? -infX : 0;
+    const minY = tileCountY === 0 ? infY - 1 : tileCountY - 1;
+    const maxX = tileCountX === 0 ? infX - 1 : tileCountX - 1;
+    const maxY = tileCountY === 0 ? -infY : 0;
 
     // get tiles in view (note that top < bottom)
     const left = Math.floor(this.viewport.left / tileWidth);

@@ -31,7 +31,7 @@
         />
       </div>
 
-      <div class="flex items-center justify-center mx-1" @click="handlePointerClick">
+      <div class="flex items-center justify-center mr-2" @click="handlePointerClick">
         <div
           class="flex items-center justify-center w-10 h-10 rounded-xl cursor-pointer transition-colors"
           :class="{
