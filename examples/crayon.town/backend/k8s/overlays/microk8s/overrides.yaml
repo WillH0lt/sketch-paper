@@ -48,5 +48,5 @@ spec:
               env:
                 - name: CLEANER_DEBUG
                   value: 'false'
-                - name: IMAGES_BUCKET_NAME
+                - name: CLEANER_BUCKET_NAME
                   value: 'crayontown'

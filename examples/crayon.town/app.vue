@@ -48,6 +48,7 @@ import throttle from 'lodash.throttle';
 import { io } from 'socket.io-client';
 import SvgCrayonLogo from '~/assets/svg/crayonLogo.svg';
 
+import { imgUrl, wsUrl } from './config.js';
 import { models } from './models.js';
 import StrokeBuffer from './strokeBuffer.js';
 import StrokeReplayer from './strokeReplayer.js';
@@ -65,6 +66,8 @@ const coords = ref({
   x: BigInt(0),
   y: BigInt(0),
 });
+
+console.log(import.meta.env);
 
 // offsets to give the illusion of an infinite canvas, sketch-paper goes up to 2^32 pixels
 // the offsets is the difference between the actual coordinates and the bounded coordinates
@@ -105,7 +108,7 @@ onMounted(async () => {
     startY: -startY,
     tileCountX: 0, // 0 means infinite
     tileCountY: 0, // 0 means infinite
-    baseUrl: 'https://storage.googleapis.com/sketch-paper-public',
+    baseUrl: imgUrl,
     allowUndo: false,
     maxTiles: 10,
     brushes: [BrushKindEnum.Crayon],
@@ -115,7 +118,7 @@ onMounted(async () => {
 const strokeBuffer = new StrokeBuffer(500);
 const strokeReplayer = new StrokeReplayer(500);
 const socket = import.meta.client
-  ? io('http://localhost:8087', {
+  ? io(wsUrl, {
       transports: ['websocket'],
     })
   : null;
