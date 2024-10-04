@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "build": "nuxt build",
+    "deploy": "nuxt generate && pnpm dlx firebase-tools deploy",
     "dev": "nuxt dev",
     "generate": "protoc -I ./backend/shared/models/ --ts_out . models.proto",
     "postinstall": "nuxt prepare",

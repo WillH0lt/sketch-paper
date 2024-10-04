@@ -10,7 +10,7 @@ spec:
   tls:
     - hosts:
         - ws.crayon.town
-      secretName: api-ingress-tls
+      secretName: crayontown-ws-ingress-tls
   rules:
     - host: ws.crayon.town
       http:

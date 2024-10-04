@@ -67,8 +67,6 @@ const coords = ref({
   y: BigInt(0),
 });
 
-console.log(import.meta.env);
-
 // offsets to give the illusion of an infinite canvas, sketch-paper goes up to 2^32 pixels
 // the offsets is the difference between the actual coordinates and the bounded coordinates
 const coordsOffset = ref({
