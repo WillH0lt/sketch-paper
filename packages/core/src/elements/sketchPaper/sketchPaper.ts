@@ -1,4 +1,5 @@
 import { System, World } from '@lastolivegames/becsy';
+import { primaryInput } from 'detect-it';
 import type { TemplateResult } from 'lit';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -12,7 +13,7 @@ import * as comps from '../../components/index.js';
 import { hexToNumber, hexToRgba } from '../../systems/common.js';
 import * as sys from '../../systems/index.js';
 import type { DrawSegment, Events, Settings, Tile } from '../../types.js';
-import { BrushKindEnum, PointerActions, WheelActions, defaultSettings } from '../../types.js';
+import { BrushKinds, PointerActions, WheelActions, defaultSettings } from '../../types.js';
 import SpBaseElement from '../base/sketchPaperBase.js';
 
 const maxWorldCoord = 2 ** 31;
@@ -40,8 +41,8 @@ class SketchPaper extends SpBaseElement {
   @property({ attribute: 'brush-color', type: String })
   private readonly brushColor = '#000000';
 
-  @property({ attribute: 'brush-kind', type: BrushKindEnum })
-  private readonly brushKind: BrushKindEnum = BrushKindEnum.None;
+  @property({ attribute: 'brush-kind', type: BrushKinds })
+  private readonly brushKind: BrushKinds = BrushKinds.None;
 
   @property({ attribute: 'brush-size', type: Number })
   private readonly brushSize = 10;
@@ -69,7 +70,7 @@ class SketchPaper extends SpBaseElement {
 
   private viewport: Viewport | null = null;
 
-  private readonly brushInstances = new Map<BrushKindEnum, BaseBrush>();
+  private readonly brushInstances = new Map<BrushKinds, BaseBrush>();
 
   private readonly onDestroyCallbacks: (() => void)[] = [];
 
@@ -198,18 +199,18 @@ class SketchPaper extends SpBaseElement {
       resources,
     );
     const cleanupGroup = System.group(sys.Deleter);
-    const networkGroup = System.group(sys.UndoRedo);
+    const undoGroup = System.group(sys.UndoRedo);
 
     inputsGroup.schedule((s) => s.before(renderGroup));
     renderGroup.schedule((s) => s.before(cleanupGroup));
-    cleanupGroup.schedule((s) => s.before(networkGroup));
+    cleanupGroup.schedule((s) => s.before(undoGroup));
 
     // =================================
     // world
 
     const world = await World.create({
       maxLimboComponents: 512 * 512,
-      defs: [inputsGroup, renderGroup, cleanupGroup, networkGroup],
+      defs: [inputsGroup, renderGroup, cleanupGroup, undoGroup],
     });
     this.onDestroyCallbacks.push(() => {
       world.terminate().catch((err: unknown) => {
@@ -266,7 +267,7 @@ class SketchPaper extends SpBaseElement {
     return html` <div id="container" style="width: 100%; height: 100%;"></div> `;
   }
 
-  private async loadBrush(kind: BrushKindEnum): Promise<void> {
+  private async loadBrush(kind: BrushKinds): Promise<void> {
     if (!this.app) {
       throw new Error('App not initialized');
     }
@@ -275,7 +276,7 @@ class SketchPaper extends SpBaseElement {
       throw new Error(`Brush of kind ${kind} already loaded`);
     }
 
-    if (kind === BrushKindEnum.Crayon) {
+    if (kind === BrushKinds.Crayon) {
       const brush = new CrayonBrush(this.app);
       await brush.init();
       this.brushInstances.set(kind, brush);
@@ -316,9 +317,16 @@ class SketchPaper extends SpBaseElement {
       mouseButtons.push('right');
     }
 
+    let dragEnabled = true;
+    if (primaryInput === 'mouse') {
+      dragEnabled = mouseButtons.length > 0;
+    } else {
+      dragEnabled = this.actionLeftMouse === PointerActions.Pan;
+    }
+
     this.viewport?.drag({
       mouseButtons: mouseButtons.join('|'),
-      factor: mouseButtons.length === 0 ? 0 : 1,
+      factor: Number(dragEnabled),
       wheel: this.actionWheel === WheelActions.Scroll,
     });
 

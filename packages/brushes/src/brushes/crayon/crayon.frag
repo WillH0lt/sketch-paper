@@ -7,7 +7,7 @@ uniform sampler2D uCrayonGrain;
 uniform float uBrushSize;
 uniform vec4 uBrushColor;
 uniform vec2 uPosition;
-uniform vec2 uLastPosition;
+uniform vec2 uPrevPosition;
 
 const float TWO_PI = 6.28318530718;
 
@@ -32,7 +32,7 @@ void main() {
     vec4 shapeMask = texture2D(uCrayonShape, shapeUv).rgba;
     float alpha = (0.05 + 0.15 * (1.0 - 0.5 * length(uBrushColor.rgb))) * shapeMask.a * uBrushColor.a;
 
-    vec2 grainUV = fract(((vUV - vec2(0.5)) * 500.0 + 0.5 * (uPosition + uLastPosition - (100.0 * (uPosition - uLastPosition)))) / 500.0);
+    vec2 grainUV = fract(((vUV - vec2(0.5)) * 500.0 + 0.5 * (uPosition + uPrevPosition - (100.0 * (uPosition - uPrevPosition)))) / 500.0);
     vec4 grain = texture2D(uCrayonGrain, grainUV);
 
     vec3 color = uBrushColor.rgb + 0.1 * (vec3(0.5) - uBrushColor.rgb) * (1.0 - alpha);

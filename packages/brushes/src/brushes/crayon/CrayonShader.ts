@@ -10,7 +10,7 @@ export interface CrayonShaderOptions {
   brushSize?: number;
   brushColor?: [number, number, number, number];
   position?: [number, number];
-  lastPosition?: [number, number];
+  prevPosition?: [number, number];
 }
 
 interface CrayonResources {
@@ -19,7 +19,7 @@ interface CrayonResources {
       uBrushSize: number;
       uBrushColor: Float32Array;
       uPosition: Float32Array;
-      uLastPosition: Float32Array;
+      uPrevPosition: Float32Array;
     };
   };
   uCrayonShape: PIXI.TextureSource;
@@ -38,7 +38,7 @@ export class CrayonShader extends BaseShader {
         uBrushSize: { value: options.brushSize, type: 'f32' },
         uBrushColor: { value: options.brushColor, type: 'vec4<f32>' },
         uPosition: { value: options.position, type: 'vec2<f32>' },
-        uLastPosition: { value: options.lastPosition, type: 'vec2<f32>' },
+        uPrevPosition: { value: options.prevPosition, type: 'vec2<f32>' },
       },
       uCrayonShape: options.crayonShape.source,
       uCrayonGrain: options.crayonGrain.source,
@@ -70,8 +70,8 @@ export class CrayonShader extends BaseShader {
     this.crayonResources.brushUniforms.uniforms.uPosition[1] = value[1];
   }
 
-  public setLastPosition(value: [number, number]): void {
-    this.crayonResources.brushUniforms.uniforms.uLastPosition[0] = value[0];
-    this.crayonResources.brushUniforms.uniforms.uLastPosition[1] = value[1];
+  public setPrevPosition(value: [number, number]): void {
+    this.crayonResources.brushUniforms.uniforms.uPrevPosition[0] = value[0];
+    this.crayonResources.brushUniforms.uniforms.uPrevPosition[1] = value[1];
   }
 }

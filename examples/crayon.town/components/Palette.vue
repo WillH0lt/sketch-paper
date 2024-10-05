@@ -21,7 +21,7 @@
         <SvgCrayon
           class="w-6 mx-auto group-hover:-translate-y-8 transition-transform"
           :class="{
-            '-translate-y-8': brush.kind === BrushKindEnum.Crayon && index === selectedIndex,
+            '-translate-y-8': brush.kind === BrushKinds.Crayon && index === selectedIndex,
             'dark-wax': luminance(colors[index]) < 50,
             'bright-wax': luminance(colors[index]) > 175,
           }"
@@ -35,14 +35,14 @@
         <div
           class="flex items-center justify-center w-10 h-10 rounded-xl cursor-pointer transition-colors"
           :class="{
-            'bg-primary': brush.kind === BrushKindEnum.None,
-            'hover:bg-gray': brush.kind !== BrushKindEnum.None,
+            'bg-primary': brush.kind === BrushKinds.None,
+            'hover:bg-gray': brush.kind !== BrushKinds.None,
           }"
         >
           <SvgPointer
             class="w-full px-2 m-auto stroke-[#231f20] transition-colors"
             :class="{
-              'stroke-[#004015]': brush.kind === BrushKindEnum.None,
+              'stroke-[#004015]': brush.kind === BrushKinds.None,
             }"
           />
         </div>
@@ -72,13 +72,13 @@
 <script setup lang="ts">
 import iro from '@jaames/iro';
 
-import { BrushKindEnum } from '@sketch-paper/core';
+import { BrushKinds } from '@sketch-paper/core';
 import SvgCrayon from '~/assets/svg/crayon.svg';
 import SvgPointer from '~/assets/svg/pointer.svg';
 
 const brush = defineModel<{
   color: string;
-  kind: BrushKindEnum;
+  kind: BrushKinds;
 }>({ required: true });
 
 const colors = ref<[string, string, string, string]>(['#FF0000', '#FF7F00', '#429EFF', '#000000']);
@@ -92,17 +92,17 @@ function handleColorClick(index: number) {
   selectedIndex.value = index;
   picker?.color.set(colors.value[index]);
   brush.value.color = colors.value[index];
-  brush.value.kind = BrushKindEnum.Crayon;
+  brush.value.kind = BrushKinds.Crayon;
 }
 
 function handlePointerClick() {
-  brush.value.kind = BrushKindEnum.None;
+  brush.value.kind = BrushKinds.None;
   colorPickerVisible.value = false;
 }
 
 function handleColorPickerClick() {
   colorPickerVisible.value = !colorPickerVisible.value;
-  brush.value.kind = BrushKindEnum.Crayon;
+  brush.value.kind = BrushKinds.Crayon;
 }
 
 function luminance(color: string) {

@@ -3,15 +3,16 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "build": "nuxt build",
+    "build": "nuxt generate",
     "deploy": "nuxt generate && pnpm dlx firebase-tools deploy",
-    "dev": "nuxt dev",
+    "dev": "nuxt dev --host",
     "generate": "protoc -I ./backend/shared/models/ --ts_out . models.proto",
     "postinstall": "nuxt prepare",
     "preview": "nuxt preview"
   },
   "dependencies": {
     "@jaames/iro": "^5.5.2",
+    "@nuxtjs/seo": "2.0.0-rc.23",
     "@sketch-paper/core": "workspace:*",
     "google-protobuf": "^3.21.4",
     "lit": "^3.2.0",
@@ -26,6 +27,7 @@
     "@nuxtjs/tailwindcss": "^6.12.1",
     "@types/google-protobuf": "^3.15.12",
     "@types/lodash.throttle": "^4.1.9",
+    "firebase-tools": "^13.20.2",
     "protoc-gen-ts": "^0.8.7"
   }
 }

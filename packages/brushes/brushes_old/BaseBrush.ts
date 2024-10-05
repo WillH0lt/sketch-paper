@@ -1,8 +1,8 @@
 import type PixiTile from '../PixiTile.js';
-import type { BrushKindEnum } from '../types.js';
+import type { BrushKinds } from '../types.js';
 
 abstract class BaseBrush {
-  public abstract readonly kind: BrushKindEnum;
+  public abstract readonly kind: BrushKinds;
 
   public abstract size: number;
 

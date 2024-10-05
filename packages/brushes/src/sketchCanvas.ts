@@ -3,7 +3,7 @@ import { Viewport } from 'pixi-viewport';
 import * as PIXI from 'pixi.js';
 
 import { CrayonBrush } from './brushes/index.js';
-import { BrushKindEnum } from './brushes/types.js';
+import { BrushKinds } from './brushes/types.js';
 
 async function setupSketchCanvas(element: HTMLElement): Promise<void> {
   // ===========================================================
@@ -76,12 +76,12 @@ async function setupSketchCanvas(element: HTMLElement): Promise<void> {
 
   let pointerDown = false;
   let last: PIXI.Point | null = null;
+  let runningLength = 0;
 
   const brush = new CrayonBrush(app);
   await brush.init();
 
   viewport.on('pointerdown', () => {
-    brush.onStrokeStart();
     pointerDown = true;
   });
 
@@ -94,6 +94,11 @@ async function setupSketchCanvas(element: HTMLElement): Promise<void> {
       last = curr;
       return;
     }
+
+    const dx = curr.x - last.x;
+    const dy = curr.y - last.y;
+    const length = Math.sqrt(dx * dx + dy * dy);
+    runningLength += length;
 
     brush.draw(
       {
@@ -108,7 +113,8 @@ async function setupSketchCanvas(element: HTMLElement): Promise<void> {
         blue: 0,
         alpha: 255,
         size: 10,
-        kind: BrushKindEnum.Crayon,
+        kind: BrushKinds.Crayon,
+        runningLength,
       },
       texture,
     );
@@ -117,9 +123,9 @@ async function setupSketchCanvas(element: HTMLElement): Promise<void> {
   });
 
   viewport.on('pointerup', () => {
-    brush.onStrokeEnd();
     last = null;
     pointerDown = false;
+    runningLength = 0;
   });
 }
 

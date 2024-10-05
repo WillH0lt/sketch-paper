@@ -1,12 +1,12 @@
 import * as PIXI from 'pixi.js';
 
 import type PixiTile from '../../PixiTile.js';
-import { BrushKindEnum } from '../../types.js';
+import { BrushKinds } from '../../types.js';
 import BaseBrush from '../BaseBrush.js';
 import { CrayonShader } from './CrayonShader.js';
 
 class CrayonBrush extends BaseBrush {
-  public readonly kind = BrushKindEnum.Crayon;
+  public readonly kind = BrushKinds.Crayon;
 
   private readonly app: PIXI.Application;
 

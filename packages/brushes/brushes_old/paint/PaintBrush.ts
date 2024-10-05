@@ -2,12 +2,12 @@ import { getStrokePoints } from 'perfect-freehand';
 import * as PIXI from 'pixi.js';
 
 import type PixiTile from '../../PixiTile.js';
-import { BrushKindEnum } from '../../types.js';
+import { BrushKinds } from '../../types.js';
 import BaseBrush from '../BaseBrush.js';
 import { PaintShader } from './PaintShader.js';
 
 class PaintBrush extends BaseBrush {
-  public readonly kind = BrushKindEnum.Paint;
+  public readonly kind = BrushKinds.Paint;
 
   private readonly app: PIXI.Application;
 

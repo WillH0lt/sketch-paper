@@ -16,6 +16,7 @@ message DrawSegment {
   uint32 alpha = 10;
   uint32 size = 11;
   uint32 kind = 12;
+  double runningLength = 13;
 }
 
 message Stroke {

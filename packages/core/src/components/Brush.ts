@@ -1,10 +1,10 @@
 import { component, field, Type } from '@lastolivegames/becsy';
 
-import type { BrushKindEnum } from '../types.js';
+import type { BrushKinds } from '../types.js';
 
 @component
 class Brush {
-  @field.uint8 public declare kind: BrushKindEnum;
+  @field.uint8 public declare kind: BrushKinds;
 
   @field.uint8 public declare red: number;
 

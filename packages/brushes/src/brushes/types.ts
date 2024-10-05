@@ -1,13 +1,6 @@
-export enum BrushKindEnum {
+export enum BrushKinds {
   None = 1,
   Crayon = 2,
-
-  // Brush = 'Brush',
-  // Paint = 'Paint',
-  // Marker = 'Marker',
-  // Crayon = 'Crayon',
-  // Smudge = 'Smudge',
-  // Eraser = 'Eraser',
 }
 
 export interface DrawSegment {
@@ -21,6 +14,7 @@ export interface DrawSegment {
   green: number;
   blue: number;
   alpha: number;
-  kind: BrushKindEnum;
+  kind: BrushKinds;
   size: number;
+  runningLength: number;
 }

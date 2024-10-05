@@ -47,6 +47,7 @@
   "dependencies": {
     "@lastolivegames/becsy": "^0.15.5",
     "@sketch-paper/brushes": "workspace:*",
+    "detect-it": "^4.0.1",
     "jsondiffpatch": "^0.6.0",
     "pixi-viewport": "^5.0.3",
     "pixi.js": "8.4.1",

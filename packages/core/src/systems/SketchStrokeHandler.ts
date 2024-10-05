@@ -5,12 +5,12 @@ import type * as PIXI from 'pixi.js';
 import type { Emitter } from 'strict-event-emitter';
 
 import * as comps from '../components/index.js';
-import type { BrushKindEnum, DrawSegment, Events } from '../types.js';
+import type { BrushKinds, DrawSegment, Events } from '../types.js';
 import SketchBase from './SketchBase.js';
 import { deleteEntity } from './common.js';
 
-function lenSq(segment: DrawSegment): number {
-  return (segment.endX - segment.startX) ** 2 + (segment.endY - segment.startY) ** 2;
+function length(segment: DrawSegment): number {
+  return Math.sqrt((segment.endX - segment.startX) ** 2 + (segment.endY - segment.startY) ** 2);
 }
 
 @system
@@ -31,7 +31,7 @@ class SketchStrokeHandler extends SketchBase {
 
   private readonly tiles = this.query((q) => q.current.with(comps.Tile));
 
-  private readonly brushInstances = new Map<BrushKindEnum, BaseBrush>();
+  private readonly brushInstances = new Map<BrushKinds, BaseBrush>();
 
   @co private *handleDrawIncoming(segments: DrawSegment[]): Generator {
     const groupedSegments = new Map<string, DrawSegment[]>();
@@ -79,8 +79,6 @@ class SketchStrokeHandler extends SketchBase {
         this.createEntity(comps.Stroke, {
           prevPoint: this.input.pointerWorld,
         });
-
-        brush.onStrokeStart();
       }
     }
 
@@ -127,12 +125,16 @@ class SketchStrokeHandler extends SketchBase {
           alpha: this.brush.alpha,
           size: this.brush.size,
           kind: this.brush.kind,
+          runningLength: stroke.runningLength,
         };
 
-        if (lenSq(segment) > 100_000) continue;
+        const segmentLength = length(segment);
+        if (segmentLength > 300) continue;
 
         brush.draw(segment, tileSprite.texture);
         segments.push(segment);
+
+        stroke.runningLength += segmentLength;
       }
 
       if (segments.length > 0) {
@@ -149,7 +151,6 @@ class SketchStrokeHandler extends SketchBase {
           this.snapshotTiles(stroke.tiles);
           deleteEntity(strokeEntity);
         }
-        brush.onStrokeEnd();
       }
     }
   }

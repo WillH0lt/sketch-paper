@@ -32,6 +32,7 @@ class InputReader extends BaseSystem {
   public initialize(): void {
     // ==========================================================================
     const pointerMoveFn = (e: PointerEvent): void => {
+      if (this.pointerIds.size > 1 || !this.pointerIds.has(e.pointerId)) return;
       const pointerWorld = this.viewport.toWorld(e.offsetX, e.offsetY);
       this.input.pointerWorld = [pointerWorld.x, pointerWorld.y];
     };
@@ -59,6 +60,11 @@ class InputReader extends BaseSystem {
       // TODO detect pen eraser (e.pointerType === 'pen' && e.buttons === 32)
 
       this.pointerIds.add(e.pointerId);
+
+      if (this.pointerIds.size > 1) {
+        this.input.pointerDown = false;
+        return;
+      }
 
       this.input.pointerDown = true;
       this.setInputTrigger('pointerDownTrigger');

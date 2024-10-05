@@ -1,8 +1,8 @@
 import type { DrawSegment } from '@sketch-paper/brushes';
-import { BrushKindEnum } from '@sketch-paper/brushes';
+import { BrushKinds } from '@sketch-paper/brushes';
 import type { EventMap } from 'strict-event-emitter';
 
-export { BrushKindEnum } from '@sketch-paper/brushes';
+export { BrushKinds } from '@sketch-paper/brushes';
 export type { DrawSegment } from '@sketch-paper/brushes';
 
 export enum PointerActions {
@@ -29,7 +29,7 @@ export interface Brush {
   green: number;
   blue: number;
   alpha: number;
-  kind: BrushKindEnum;
+  kind: BrushKinds;
   size: number;
 }
 
@@ -48,7 +48,7 @@ export interface Settings {
   allowUndo: boolean;
   tileLoadingConcurrency: number;
   maxTiles: number;
-  brushes: Exclude<BrushKindEnum, BrushKindEnum.None>[];
+  brushes: Exclude<BrushKinds, BrushKinds.None>[];
 }
 
 export const defaultSettings: Settings = {
@@ -66,7 +66,7 @@ export const defaultSettings: Settings = {
   allowUndo: true,
   tileLoadingConcurrency: 3,
   maxTiles: 20,
-  brushes: [BrushKindEnum.Crayon],
+  brushes: [BrushKinds.Crayon],
 };
 
 export interface Tile {

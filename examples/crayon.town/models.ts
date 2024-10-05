@@ -20,6 +20,7 @@ export namespace models {
             alpha?: number;
             size?: number;
             kind?: number;
+            runningLength?: number;
         }) {
             super();
             pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
@@ -59,6 +60,9 @@ export namespace models {
                 }
                 if ("kind" in data && data.kind != undefined) {
                     this.kind = data.kind;
+                }
+                if ("runningLength" in data && data.runningLength != undefined) {
+                    this.runningLength = data.runningLength;
                 }
             }
         }
@@ -134,6 +138,12 @@ export namespace models {
         set kind(value: number) {
             pb_1.Message.setField(this, 12, value);
         }
+        get runningLength() {
+            return pb_1.Message.getFieldWithDefault(this, 13, 0) as number;
+        }
+        set runningLength(value: number) {
+            pb_1.Message.setField(this, 13, value);
+        }
         static fromObject(data: {
             tileX?: number;
             tileY?: number;
@@ -147,6 +157,7 @@ export namespace models {
             alpha?: number;
             size?: number;
             kind?: number;
+            runningLength?: number;
         }): DrawSegment {
             const message = new DrawSegment({});
             if (data.tileX != null) {
@@ -185,6 +196,9 @@ export namespace models {
             if (data.kind != null) {
                 message.kind = data.kind;
             }
+            if (data.runningLength != null) {
+                message.runningLength = data.runningLength;
+            }
             return message;
         }
         toObject() {
@@ -201,6 +215,7 @@ export namespace models {
                 alpha?: number;
                 size?: number;
                 kind?: number;
+                runningLength?: number;
             } = {};
             if (this.tileX != null) {
                 data.tileX = this.tileX;
@@ -238,6 +253,9 @@ export namespace models {
             if (this.kind != null) {
                 data.kind = this.kind;
             }
+            if (this.runningLength != null) {
+                data.runningLength = this.runningLength;
+            }
             return data;
         }
         serialize(): Uint8Array;
@@ -268,6 +286,8 @@ export namespace models {
                 writer.writeUint32(11, this.size);
             if (this.kind != 0)
                 writer.writeUint32(12, this.kind);
+            if (this.runningLength != 0)
+                writer.writeDouble(13, this.runningLength);
             if (!w)
                 return writer.getResultBuffer();
         }
@@ -312,6 +332,9 @@ export namespace models {
                         break;
                     case 12:
                         message.kind = reader.readUint32();
+                        break;
+                    case 13:
+                        message.runningLength = reader.readDouble();
                         break;
                     default: reader.skipField();
                 }

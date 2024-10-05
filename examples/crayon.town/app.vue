@@ -43,7 +43,7 @@ import type {
   SpMoveEvent,
   SpTileLoadEvent,
 } from '@sketch-paper/core';
-import { BrushKindEnum, PointerActions } from '@sketch-paper/core';
+import { BrushKinds, PointerActions } from '@sketch-paper/core';
 import throttle from 'lodash.throttle';
 import { io } from 'socket.io-client';
 import SvgCrayonLogo from '~/assets/svg/crayonLogo.svg';
@@ -59,7 +59,7 @@ const router = useRouter();
 const sketchPaperRef = ref<InstanceType<typeof SketchPaper>>();
 const brush = ref({
   color: '#FF0000',
-  kind: BrushKindEnum.None,
+  kind: BrushKinds.None,
 });
 const peopleHere = ref(0);
 const coords = ref({
@@ -75,7 +75,7 @@ const coordsOffset = ref({
 });
 
 const actionLeftMouse = computed(() => {
-  return brush.value.kind === BrushKindEnum.None ? PointerActions.Pan : PointerActions.Draw;
+  return brush.value.kind === BrushKinds.None ? PointerActions.Pan : PointerActions.Draw;
 });
 
 const path = router.currentRoute.value.path;
@@ -109,7 +109,7 @@ onMounted(async () => {
     baseUrl: imgUrl,
     allowUndo: false,
     maxTiles: 10,
-    brushes: [BrushKindEnum.Crayon],
+    brushes: [BrushKinds.Crayon],
   });
 });
 

@@ -44,8 +44,24 @@ class StrokeBuffer {
     this.interval = setInterval(() => {
       if (this.buffer.length === 0) return;
 
-      removeRedundant(this.buffer);
-      const segments = this.buffer;
+      // sort by tile
+      const tileMap = new Map<string, DrawSegment[]>();
+      for (const segment of this.buffer) {
+        const key = `${segment.tileX}_${segment.tileY}`;
+        if (!tileMap.has(key)) tileMap.set(key, []);
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        tileMap.get(key)!.push(segment);
+      }
+
+      for (const s of tileMap.values()) {
+        removeRedundant(s);
+      }
+
+      const segments = [];
+      for (const s of tileMap.values()) {
+        segments.push(...s);
+      }
+
       this.buffer = [];
 
       for (const listener of this.listeners) {

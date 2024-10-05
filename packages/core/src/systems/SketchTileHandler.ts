@@ -31,13 +31,12 @@ class SketchTileHandler extends SketchBase {
       q.added.and.current.and.removed.and.addedOrChanged.with(comps.TileSource).write.trackWrites,
   );
 
-  @co private *applyImageToTile(tileEntity: Entity): Generator {
+  @co private *applyImageToTile(tileEntity: Entity, sourceEntity: Entity): Generator {
     const tileSprite = this.getTileSprite(tileEntity);
 
     if (!tileSprite) return;
 
-    const tileSourceEntity = tileEntity.read(comps.Tile).source;
-    const image = tileSourceEntity.read(comps.TileSource).image;
+    const image = sourceEntity.read(comps.TileSource).image;
     if (tileSprite.texture.source.label === image) return;
 
     const heldTileEntity = tileEntity.hold();
@@ -119,8 +118,10 @@ class SketchTileHandler extends SketchBase {
 
     // update tile sprite images
     for (const tileSourceEntity of this.tileSources.addedOrChanged) {
-      const tileEntity = tileSourceEntity.read(comps.TileSource).tiles[0];
-      this.applyImageToTile(tileEntity);
+      if (tileSourceEntity.has(comps.ToBeDeleted)) continue;
+      const source = tileSourceEntity.read(comps.TileSource);
+      const tileEntity = source.tiles[0];
+      this.applyImageToTile(tileEntity, tileSourceEntity);
     }
 
     // remove tile sprites
@@ -146,13 +147,13 @@ class SketchTileHandler extends SketchBase {
     const { tileCountX, tileCountY, tileWidth, tileHeight } = this.settings;
 
     // largest possible values without causing overflow
-    const infX = Math.floor(2 ** 31 / tileWidth);
-    const infY = Math.floor(2 ** 31 / tileHeight);
+    const boundX = Math.floor(2 ** 31 / tileWidth);
+    const boundY = Math.floor(2 ** 31 / tileHeight);
 
-    const minX = tileCountX === 0 ? -infX : 0;
-    const minY = tileCountY === 0 ? infY - 1 : tileCountY - 1;
-    const maxX = tileCountX === 0 ? infX - 1 : tileCountX - 1;
-    const maxY = tileCountY === 0 ? -infY : 0;
+    const minX = tileCountX === 0 ? -boundX : 0;
+    const minY = tileCountY === 0 ? boundY - 1 : tileCountY - 1;
+    const maxX = tileCountX === 0 ? boundX - 1 : tileCountX - 1;
+    const maxY = tileCountY === 0 ? -boundY : 0;
 
     // get tiles in view (note that top < bottom)
     const left = Math.floor(this.viewport.left / tileWidth);
@@ -184,8 +185,6 @@ class SketchTileHandler extends SketchBase {
           index: [x, y],
           source: sourceEntity,
         });
-
-        this.applyImageToTile(sourceEntity.read(comps.TileSource).tiles[0]);
       }
     }
   }
@@ -215,7 +214,8 @@ class SketchTileHandler extends SketchBase {
 
       if (!tileEntity) continue;
 
-      this.deleteEntity(tileEntity.read(comps.Tile).source);
+      const sourceEntity = tileEntity.read(comps.Tile).source;
+      this.deleteEntity(sourceEntity);
       this.deleteEntity(tileEntity);
     }
   }

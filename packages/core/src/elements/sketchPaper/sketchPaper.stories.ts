@@ -1,7 +1,7 @@
 import type { Meta } from '@storybook/web-components';
 import { html } from 'lit';
 
-import { BrushKindEnum, PointerActions, WheelActions } from '../../types.js';
+import { BrushKinds, PointerActions, WheelActions } from '../../types.js';
 import './sketchPaper.js';
 import type SketchPaper from './sketchPaper.js';
 
@@ -13,10 +13,10 @@ export default {
       <sketch-paper
         brush-color=${brushColor}
         brush-size=${brushSize}
-        brush-kind=${BrushKindEnum.Crayon}
+        brush-kind=${BrushKinds.Crayon}
         action-left-mouse=${PointerActions.Draw}
-        action-middle-mouse=${PointerActions.None}
-        action-right-mouse=${PointerActions.Draw}
+        action-middle-mouse=${PointerActions.Pan}
+        action-right-mouse=${PointerActions.Pan}
         action-wheel=${WheelActions.Zoom}
       ></sketch-paper>
     </div>`,
@@ -26,7 +26,7 @@ export default {
 
     sketchPaper
       .initialize({
-        brushes: [BrushKindEnum.Crayon],
+        brushes: [BrushKinds.Crayon],
       })
       .catch((err: unknown) => {
         console.error(err);

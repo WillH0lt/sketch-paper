@@ -1,12 +1,12 @@
 import * as PIXI from 'pixi.js';
 
 import type PixiTile from '../../PixiTile.js';
-import { BrushKindEnum } from '../../types.js';
+import { BrushKinds } from '../../types.js';
 import BaseBrush from '../BaseBrush.js';
 import { SmudgeShader } from './SmudgeShader.js';
 
 class SmudgeBrush extends BaseBrush {
-  public readonly kind = BrushKindEnum.Smudge;
+  public readonly kind = BrushKinds.Smudge;
 
   public color = [0, 0, 0, 0] as [number, number, number, number];
 

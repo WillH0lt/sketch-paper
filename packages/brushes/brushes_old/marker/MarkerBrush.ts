@@ -1,7 +1,7 @@
 import * as PIXI from 'pixi.js';
 
 import type PixiTile from '../../PixiTile.js';
-import { BrushKindEnum } from '../../types.js';
+import { BrushKinds } from '../../types.js';
 import BaseBrush from '../BaseBrush.js';
 import { MarkerShader } from './MarkerShader.js';
 
@@ -14,7 +14,7 @@ function catmullRom(t: number, p0: number, p1: number, p2: number, p3: number): 
 }
 
 class MarkerBrush extends BaseBrush {
-  public readonly kind = BrushKindEnum.Marker;
+  public readonly kind = BrushKinds.Marker;
 
   private readonly app: PIXI.Application;
 
