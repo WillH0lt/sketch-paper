@@ -25,8 +25,7 @@ npm i sketch-paper
 <script setup>
   import { onMounted } from 'vue';
 
-  import '@sketch-paper/core';
-  import type { BrushKinds } from '@sketch-paper/core';
+  import { BrushKinds } '@sketch-paper/core';
 
   onMounted(() => {
     const sketchPaper = document.getElementById('sketch-paper');
