@@ -16,9 +16,9 @@ npm i sketch-paper
     id="sketch-paper"
     width="100vw"
     height="100vh"
-    :brush-color="brush.color"
-    :brush-kind="brush.kind"
-    :brush-size="15"
+    brush-color="#FF0000"
+    brush-size="15"
+    :brush-kind="BrushKinds.Marker"
   ></sketch-paper>
 </template>
 
@@ -26,6 +26,7 @@ npm i sketch-paper
   import { onMounted } from 'vue';
 
   import '@sketch-paper/core';
+  import type { BrushKinds } from '@sketch-paper/core';
 
   onMounted(() => {
     const sketchPaper = document.getElementById('sketch-paper');
@@ -33,9 +34,12 @@ npm i sketch-paper
     sketchPaper.initialize({
       minZoom: 1,
       maxZoom: 10,
+      startX: 0,
+      startY: 0,
       tileCountX: 0, // 0 means infinite
       tileCountY: 0, // 0 means infinite
       allowUndo: true,
+      brushes: [BrushKinds.Crayon, BrushKinds.Marker, BrushKinds.Paint],
     });
   });
 </script>
