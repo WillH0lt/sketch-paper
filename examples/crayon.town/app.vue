@@ -11,8 +11,14 @@
       :action-left-mouse="actionLeftMouse"
     ></sketch-paper>
 
-    <div class="absolute top-0 left-0 m-4 text-4xl pointer-events-none">
-      <SvgCrayonLogo class="scale-150" />
+    <div class="absolute top-0 left-0 m-4 pointer-events-none">
+      <img src="/logo.svg" class="w-12" />
+    </div>
+
+    <div class="absolute top-0 right-0 m-4 cursor-pointer">
+      <a href="https://github.com/WillH0lt/sketch-paper" target="_blank">
+        <img src="/git.svg" class="w-6 hover:scale-110 cursor-pointer transition-transform" />
+      </a>
     </div>
 
     <div
@@ -46,7 +52,6 @@ import type {
 import { BrushKinds, PointerActions } from '@sketch-paper/core';
 import throttle from 'lodash.throttle';
 import { io } from 'socket.io-client';
-import SvgCrayonLogo from '~/assets/svg/crayonLogo.svg';
 
 import { imgUrl, wsUrl } from './config.js';
 import { models } from './models.js';
