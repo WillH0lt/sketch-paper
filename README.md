@@ -22,21 +22,22 @@ npm i sketch-paper
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
+  import { onMounted } from 'vue';
 
-import '@sketch-paper/core';
+  import '@sketch-paper/core';
 
-const sketchPaperRef = ref();
+  const sketchPaperRef = ref();
 
-onMounted(() => {
-  sketchPaperRef.value.initialize({
-    minZoom: 1,
-    maxZoom: 10,
-    tileCountX: 0, // 0 means infinite
-    tileCountY: 0, // 0 means infinite
-    allowUndo: true
+  onMounted(() => {
+    sketchPaperRef.value.initialize({
+      minZoom: 1,
+      maxZoom: 10,
+      tileCountX: 0, // 0 means infinite
+      tileCountY: 0, // 0 means infinite
+      allowUndo: true,
+    });
   });
-})
+</script>
 ```
 
 Check out the demo at [sketchpaper.ink](https://sketchpaper.ink).
