@@ -13,8 +13,9 @@ npm i sketch-paper
 ```html
 <template>
   <sketch-paper
-    class="w-92 h-92"
-    ref="sketchPaperRef"
+    id="sketch-paper"
+    width="100vw"
+    height="100vh"
     :brush-color="brush.color"
     :brush-kind="brush.kind"
     :brush-size="15"
@@ -26,10 +27,10 @@ npm i sketch-paper
 
   import '@sketch-paper/core';
 
-  const sketchPaperRef = ref();
-
   onMounted(() => {
-    sketchPaperRef.value.initialize({
+    const sketchPaper = document.getElementById('sketch-paper');
+
+    sketchPaper.initialize({
       minZoom: 1,
       maxZoom: 10,
       tileCountX: 0, // 0 means infinite
