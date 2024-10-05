@@ -111,6 +111,17 @@ onMounted(async () => {
     maxTiles: 10,
     brushes: [BrushKinds.Crayon],
   });
+
+  // refresh app when resuming from being frozen
+  if (import.meta.client) {
+    document.addEventListener(
+      'resume',
+      () => {
+        window.location.reload();
+      },
+      { capture: true },
+    );
+  }
 });
 
 const strokeBuffer = new StrokeBuffer(500);
