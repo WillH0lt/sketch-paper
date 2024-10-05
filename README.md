@@ -1,4 +1,4 @@
-# Sketch Paper
+# 🖍️ Sketch Paper
 
 Sketch Paper is a library for creating drawing applications. It's the software behind [crayon.town](https://crayon.town).
 
