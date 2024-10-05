@@ -126,16 +126,28 @@ importers:
 
   packages/brushes:
     dependencies:
+      lodash.merge:
+        specifier: ^4.6.2
+        version: 4.6.2
       pixi.js:
         specifier: 8.x.x
         version: 8.4.1
     devDependencies:
+      '@tweakpane/core':
+        specifier: ^2.0.4
+        version: 2.0.4
+      '@types/lodash.merge':
+        specifier: ^4.6.9
+        version: 4.6.9
       pixi-viewport:
         specifier: ^5.0.3
         version: 5.0.3
       rollup-plugin-peer-deps-external:
         specifier: ^2.2.4
         version: 2.2.4(rollup@4.21.3)
+      tweakpane:
+        specifier: ^4.0.4
+        version: 4.0.4
       typescript:
         specifier: 5.4.2
         version: 5.4.2
@@ -3823,6 +3835,10 @@ packages:
     engines: {node: '>=10.13.0'}
     dev: false
 
+  /@tweakpane/core@2.0.4:
+    resolution: {integrity: sha512-0P3xcmvjBr8AmqMOEDNYIbkiaPwvQPkj8VeJX+8ZYkpRgWWbNp1HLbld0MDI0WJHdom89osH3MmCDLnWEXKI2w==}
+    dev: true
+
   /@types/argparse@1.0.38:
     resolution: {integrity: sha512-ebDJ9b0e702Yr7pWgB0jzm+CX4Srzz8RcXtLJDJB+BSccqMa36uyH/zUsSYao5+BD1ytv3k3rPYCq4mAE1hsXA==}
     dev: true
@@ -4014,6 +4030,12 @@ packages:
 
   /@types/json5@0.0.29:
     resolution: {integrity: sha512-dRLjCWHYg4oaA77cxO64oO+7JwCwnIzkZPdrrC71jQmQtlhM556pwKo5bUzqvZndkVbeFLIIi+9TC40JNF5hNQ==}
+    dev: true
+
+  /@types/lodash.merge@4.6.9:
+    resolution: {integrity: sha512-23sHDPmzd59kUgWyKGiOMO2Qb9YtqRO/x4IhkgNUiPQ1+5MUVqi6bCZeq9nBJ17msjIMbEIO5u+XW4Kz6aGUhQ==}
+    dependencies:
+      '@types/lodash': 4.17.7
     dev: true
 
   /@types/lodash.throttle@4.1.9:
@@ -15533,6 +15555,10 @@ packages:
     dependencies:
       tslib: 1.14.1
       typescript: 5.4.2
+    dev: true
+
+  /tweakpane@4.0.4:
+    resolution: {integrity: sha512-RkWD54zDlEbnN01wQPk0ANHGbdCvlJx/E8A1QxhTfCbX+ROWos1Ws2MnhOm39aUGMOh+36TjUwpDmLfmwTr1Fg==}
     dev: true
 
   /type-check@0.4.0:

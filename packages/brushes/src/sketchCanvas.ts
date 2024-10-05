@@ -1,9 +1,13 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { Viewport } from 'pixi-viewport';
 import * as PIXI from 'pixi.js';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { Pane } from 'tweakpane';
 
-import { CrayonBrush } from './brushes/index.js';
+import type { BaseBrush } from './brushes/index.js';
+import { CrayonBrush, MarkerBrush, PaintBrush } from './brushes/index.js';
 import { BrushKinds } from './brushes/types.js';
+import { hexToRgba } from './utils.js';
 
 async function setupSketchCanvas(element: HTMLElement): Promise<void> {
   // ===========================================================
@@ -42,8 +46,7 @@ async function setupSketchCanvas(element: HTMLElement): Promise<void> {
 
   viewport.setZoom(1, true);
 
-  const shift = 0; // 2 ** 32 - 1;
-  viewport.moveCenter(shift, shift);
+  viewport.moveCenter(width / 2, height / 2);
 
   app.stage.addChild(viewport);
 
@@ -55,7 +58,6 @@ async function setupSketchCanvas(element: HTMLElement): Promise<void> {
     height,
   });
 
-  // //
   const white = new PIXI.Sprite(PIXI.Texture.WHITE);
   white.width = texture.width;
   white.height = texture.height;
@@ -65,11 +67,58 @@ async function setupSketchCanvas(element: HTMLElement): Promise<void> {
     target: texture,
     clear: true,
   });
-  // //
 
   const sprite = new PIXI.Sprite(texture);
-  sprite.position.set(shift, shift);
   viewport.addChild(sprite);
+
+  // ===========================================================
+  // initialize brushes
+
+  const brushes = new Map<BrushKinds, BaseBrush>();
+  brushes.set(BrushKinds.Crayon, new CrayonBrush(app));
+  brushes.set(BrushKinds.Marker, new MarkerBrush(app));
+  brushes.set(BrushKinds.Paint, new PaintBrush(app));
+
+  await Promise.all(Array.from(brushes.values()).map(async (brush) => brush.init()));
+
+  // ===========================================================
+  // create controls ui
+
+  const brushParams = {
+    kind: BrushKinds.Crayon,
+    color: '#ff0000ff',
+    size: 30,
+  };
+
+  const pane = new Pane();
+
+  pane.addBinding(brushParams, 'kind', {
+    view: 'list',
+    label: 'brush',
+    options: [
+      { text: 'Crayon', value: BrushKinds.Crayon },
+      { text: 'Marker', value: BrushKinds.Marker },
+      { text: 'Paint', value: BrushKinds.Paint },
+    ],
+  });
+
+  pane.addBinding(brushParams, 'color');
+  pane.addBinding(brushParams, 'size', {
+    min: 1,
+    max: 100,
+  });
+
+  const clearBtn = pane.addButton({
+    title: 'Clear',
+  });
+
+  clearBtn.on('click', () => {
+    app.renderer.render({
+      container: white,
+      target: texture,
+      clear: true,
+    });
+  });
 
   // ===========================================================
   // handle drawing
@@ -77,9 +126,6 @@ async function setupSketchCanvas(element: HTMLElement): Promise<void> {
   let pointerDown = false;
   let last: PIXI.Point | null = null;
   let runningLength = 0;
-
-  const brush = new CrayonBrush(app);
-  await brush.init();
 
   viewport.on('pointerdown', () => {
     pointerDown = true;
@@ -100,6 +146,11 @@ async function setupSketchCanvas(element: HTMLElement): Promise<void> {
     const length = Math.sqrt(dx * dx + dy * dy);
     runningLength += length;
 
+    const [red, green, blue, alpha] = hexToRgba(brushParams.color);
+
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const brush = brushes.get(brushParams.kind)!;
+
     brush.draw(
       {
         tileX: sprite.x,
@@ -108,12 +159,12 @@ async function setupSketchCanvas(element: HTMLElement): Promise<void> {
         startY: last.y,
         endX: curr.x,
         endY: curr.y,
-        red: 0,
-        green: 0,
-        blue: 0,
-        alpha: 255,
-        size: 10,
-        kind: BrushKinds.Crayon,
+        red,
+        green,
+        blue,
+        alpha,
+        size: brushParams.size,
+        kind: brushParams.kind,
         runningLength,
       },
       texture,

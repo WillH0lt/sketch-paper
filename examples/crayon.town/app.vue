@@ -108,7 +108,7 @@ onMounted(async () => {
     tileCountY: 0, // 0 means infinite
     baseUrl: imgUrl,
     allowUndo: false,
-    maxTiles: 10,
+    maxTiles: 20,
     brushes: [BrushKinds.Crayon],
   });
 

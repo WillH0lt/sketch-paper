@@ -1,6 +1,8 @@
 export enum BrushKinds {
   None = 1,
   Crayon = 2,
+  Marker = 3,
+  Paint = 4,
 }
 
 export interface DrawSegment {

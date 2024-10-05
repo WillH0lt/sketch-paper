@@ -9,10 +9,6 @@ import type { BrushKinds, DrawSegment, Events } from '../types.js';
 import SketchBase from './SketchBase.js';
 import { deleteEntity } from './common.js';
 
-function length(segment: DrawSegment): number {
-  return Math.sqrt((segment.endX - segment.startX) ** 2 + (segment.endY - segment.startY) ** 2);
-}
-
 @system
 class SketchStrokeHandler extends SketchBase {
   public readonly app!: PIXI.Application;
@@ -104,7 +100,11 @@ class SketchStrokeHandler extends SketchBase {
         .concat(intersectedB)
         .filter((tile, index, self) => index === self.findIndex((t) => t === tile));
 
+      const segmentLength = Math.sqrt((end[0] - start[0]) ** 2 + (end[1] - start[1]) ** 2);
+      if (segmentLength > 300) continue;
+
       const segments = [];
+
       for (const tileSprite of tilesSprites) {
         const tileEntity = this.getTileEntity(tileSprite);
         if (!tileEntity) continue;
@@ -128,18 +128,15 @@ class SketchStrokeHandler extends SketchBase {
           runningLength: stroke.runningLength,
         };
 
-        const segmentLength = length(segment);
-        if (segmentLength > 300) continue;
-
         brush.draw(segment, tileSprite.texture);
         segments.push(segment);
-
-        stroke.runningLength += segmentLength;
       }
 
       if (segments.length > 0) {
         this.emitter.emit('draw-outgoing', segments);
       }
+
+      stroke.runningLength += segmentLength;
     }
 
     // delete strokes on pointer up
