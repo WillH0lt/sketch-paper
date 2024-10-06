@@ -176,6 +176,8 @@ func (r RoomController) nClients() int {
 }
 
 func verifyStroke(stroke *models.Stroke) error {
+	c := config.GetConfig()
+
 	if len(stroke.Segments) == 0 {
 		return fmt.Errorf("stroke has no segments")
 	}
@@ -188,6 +190,15 @@ func verifyStroke(stroke *models.Stroke) error {
 		lengthSq := powInt(segment.EndX-segment.StartX, 2) + powInt(segment.EndY-segment.StartY, 2)
 		if lengthSq > 1e6 {
 			return fmt.Errorf("segment is too long")
+		}
+		if int(segment.Kind) != c.BrushKind {
+			return fmt.Errorf("segment has wrong brush kind")
+		}
+		if int(segment.Size) != c.BrushSize {
+			return fmt.Errorf("segment has wrong brush size")
+		}
+		if segment.Alpha != 255 {
+			return fmt.Errorf("alpha must be 255")
 		}
 	}
 
