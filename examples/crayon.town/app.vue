@@ -11,30 +11,41 @@
       :action-left-mouse="actionLeftMouse"
     ></sketch-paper>
 
-    <div class="absolute top-0 left-0 m-4 pointer-events-none">
-      <img src="/logo.svg" class="w-12" />
+    <div class="absolute top-4 left-4" @click="sketchPaperRef?.move(0, 0)">
+      <img src="/logo.svg" class="h-8 sm:h-10 -mt-1 cursor-pointer" />
     </div>
 
-    <div class="absolute top-0 right-0 m-4 cursor-pointer">
-      <a href="https://github.com/WillH0lt/sketch-paper" target="_blank">
-        <img src="/git.svg" class="w-6 hover:scale-110 cursor-pointer transition-transform" />
+    <div class="absolute top-4 right-4 flex gap-4 h-6">
+      <a class="cursor-pointer" href="https://discord.gg/eQCK49e5DU" target="_blank">
+        <svgDiscord
+          class="h-full cursor-pointer fill-black hover:fill-[#303030] transition-colors"
+        />
+      </a>
+      <a class="cursor-pointer" href="https://github.com/WillH0lt/sketch-paper" target="_blank">
+        <svgGithub
+          class="h-full cursor-pointer fill-black hover:fill-[#303030] transition-colors"
+        />
       </a>
     </div>
 
+    <div class="absolute w-full bottom-0 h-10 bg-black sm:hidden"></div>
+
     <div
-      class="absolute bottom-1 left-2 pointer-events-none text-2xl text-black hidden md:block"
+      class="absolute bottom-2 left-2 pointer-events-none md:text-2xl text-white sm:text-black"
       v-if="peopleHere > 0"
     >
       people here: {{ peopleHere }}
     </div>
 
-    <div class="absolute flex w-full bottom-0 justify-center overflow-hidden pointer-events-none">
-      <div class="flex items-end h-screen w-full max-w-[400px]">
+    <div
+      class="absolute flex w-full bottom-0 justify-center overflow-hidden pointer-events-none mb-10 sm:mb-0"
+    >
+      <div class="flex items-end h-screen w-full sm:max-w-[400px]">
         <palette v-model="brush"></palette>
       </div>
     </div>
 
-    <div class="absolute bottom-1 right-1 pointer-events-none text-2xl text-black hidden md:block">
+    <div class="absolute bottom-1 right-1 pointer-events-none md:text-2xl text-white sm:text-black">
       <coordinates v-model="coords" @update="handleCoordinatesUpdate"></coordinates>
     </div>
   </div>
@@ -53,6 +64,8 @@ import { BrushKinds, PointerActions } from '@sketch-paper/core';
 import throttle from 'lodash.throttle';
 import { io } from 'socket.io-client';
 
+import svgDiscord from '~/assets/svg/discord.svg';
+import svgGithub from '~/assets/svg/github.svg';
 import { imgUrl, wsUrl } from './config.js';
 import { models } from './models.js';
 import StrokeBuffer from './strokeBuffer.js';

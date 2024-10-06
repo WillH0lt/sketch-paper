@@ -12,7 +12,7 @@
       <div ref="colorPickerRef" class="w-full flex justify-center mt-10"></div>
     </div>
 
-    <div class="flex flex-1 pt-1 relative h-16 bg-white rounded-t-xl drop-shadow-2xl">
+    <div class="flex flex-1 pt-1 relative h-16 bg-white sm:rounded-t-2xl drop-shadow-2xl">
       <div
         class="w-full cursor-pointer group"
         v-for="(_, index) in colors"
