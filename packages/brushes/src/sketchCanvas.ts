@@ -54,11 +54,12 @@ async function setupSketchCanvas(element: HTMLElement): Promise<void> {
   // setup drawing surface
 
   const texture = PIXI.RenderTexture.create({
-    width,
-    height,
+    width: 2048,
+    height: 2048,
   });
 
   const white = new PIXI.Sprite(PIXI.Texture.WHITE);
+  white.tint = 0xc2bcb0;
   white.width = texture.width;
   white.height = texture.height;
 
@@ -120,6 +121,25 @@ async function setupSketchCanvas(element: HTMLElement): Promise<void> {
     });
   });
 
+  const downloadBtn = pane.addButton({
+    title: 'Download',
+  });
+
+  async function download(): Promise<void> {
+    const img = await app.renderer.extract.image(texture);
+    const url = img.src;
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'sketch.png';
+    a.click();
+  }
+
+  downloadBtn.on('click', () => {
+    download().catch((err: unknown) => {
+      console.error(err);
+    });
+  });
+
   // ===========================================================
   // handle drawing
 
@@ -127,7 +147,8 @@ async function setupSketchCanvas(element: HTMLElement): Promise<void> {
   let last: PIXI.Point | null = null;
   let runningLength = 0;
 
-  viewport.on('pointerdown', () => {
+  viewport.on('pointerdown', (ev: PointerEvent) => {
+    if (ev.button !== 0) return;
     pointerDown = true;
   });
 
@@ -173,7 +194,8 @@ async function setupSketchCanvas(element: HTMLElement): Promise<void> {
     last = curr;
   });
 
-  viewport.on('pointerup', () => {
+  viewport.on('pointerup', (ev: PointerEvent) => {
+    if (ev.button !== 0) return;
     last = null;
     pointerDown = false;
     runningLength = 0;

@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/prefer-default-export
 export function hexToRgba(hex: string): [number, number, number, number] {
   let bigint = parseInt(hex.slice(1), 16);
 

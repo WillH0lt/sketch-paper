@@ -3,7 +3,7 @@
     <div class="fixed inset-0" v-if="colorPickerVisible" @click="colorPickerVisible = false"></div>
 
     <div
-      class="absolute bottom-12 left-0 right-0 h-72 bg-[#dbdbd5] rounded-t-2xl drop-shadow-lg transition"
+      class="absolute bottom-12 left-0 right-0 h-72 bg-[#dbdbd5] rounded-t-2xl drop-shadow-lg transition cursor-auto"
       :class="{
         'translate-y-[150%]': !colorPickerVisible,
         'translate-y-0': colorPickerVisible,
@@ -12,7 +12,9 @@
       <div ref="colorPickerRef" class="w-full flex justify-center mt-10"></div>
     </div>
 
-    <div class="flex flex-1 pt-1 relative h-16 bg-white sm:rounded-t-2xl drop-shadow-2xl">
+    <div
+      class="flex flex-1 pt-1 relative h-16 bg-white sm:rounded-t-2xl drop-shadow-2xl cursor-auto"
+    >
       <div
         class="w-full cursor-pointer group"
         v-for="(_, index) in colors"
@@ -39,8 +41,8 @@
             'hover:bg-gray': brush.kind !== BrushKinds.None,
           }"
         >
-          <SvgPointer
-            class="w-full px-2 m-auto stroke-[#231f20] transition-colors"
+          <SvgHand
+            class="w-full h-full px-2 m-auto stroke-[#231f20] transition-colors"
             :class="{
               'stroke-[#004015]': brush.kind === BrushKinds.None,
             }"
@@ -74,7 +76,8 @@ import iro from '@jaames/iro';
 
 import { BrushKinds } from '@sketch-paper/core';
 import SvgCrayon from '~/assets/svg/crayon.svg';
-import SvgPointer from '~/assets/svg/pointer.svg';
+import SvgHand from '~/assets/svg/hand.svg';
+import { luminance } from '../utils.js';
 
 const brush = defineModel<{
   color: string;
@@ -103,15 +106,6 @@ function handlePointerClick() {
 function handleColorPickerClick() {
   colorPickerVisible.value = !colorPickerVisible.value;
   brush.value.kind = BrushKinds.Crayon;
-}
-
-function luminance(color: string) {
-  const hex = color.replace('#', '');
-  const r = parseInt(hex.substr(0, 2), 16);
-  const g = parseInt(hex.substr(2, 2), 16);
-  const b = parseInt(hex.substr(4, 2), 16);
-
-  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 }
 
 watch(
@@ -145,3 +139,9 @@ onMounted(() => {
   });
 });
 </script>
+
+<style>
+.IroHandle {
+  cursor: grab;
+}
+</style>

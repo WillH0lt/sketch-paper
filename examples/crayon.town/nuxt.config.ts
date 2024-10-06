@@ -9,6 +9,9 @@ export default defineNuxtConfig({
       'Welcome to CrayonTown, the infinite canvas for crayon drawings! Sketch awesome art with friends or strangers in real-time. Jump in and create your own crayon masterpiece!',
     defaultLocale: 'en',
   },
+  seo: {
+    fallbackTitle: false,
+  },
   css: ['~/assets/style.css'],
   tailwindcss: {
     config: {

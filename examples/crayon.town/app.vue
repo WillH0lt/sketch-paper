@@ -18,12 +18,12 @@
     <div class="absolute top-4 right-4 flex gap-4 h-6">
       <a class="cursor-pointer" href="https://discord.gg/eQCK49e5DU" target="_blank">
         <svgDiscord
-          class="h-full cursor-pointer fill-black hover:fill-[#303030] transition-colors"
+          class="h-full w-6 cursor-pointer fill-black hover:fill-[#303030] transition-colors"
         />
       </a>
       <a class="cursor-pointer" href="https://github.com/WillH0lt/sketch-paper" target="_blank">
         <svgGithub
-          class="h-full cursor-pointer fill-black hover:fill-[#303030] transition-colors"
+          class="h-full w-6 cursor-pointer fill-black hover:fill-[#303030] transition-colors"
         />
       </a>
     </div>
@@ -37,16 +37,16 @@
       people here: {{ peopleHere }}
     </div>
 
+    <div class="absolute bottom-1 right-1 pointer-events-none md:text-2xl text-white sm:text-black">
+      <coordinates v-model="coords" @update="handleCoordinatesUpdate"></coordinates>
+    </div>
+
     <div
       class="absolute flex w-full bottom-0 justify-center overflow-hidden pointer-events-none mb-10 sm:mb-0"
     >
       <div class="flex items-end h-screen w-full sm:max-w-[400px]">
         <palette v-model="brush"></palette>
       </div>
-    </div>
-
-    <div class="absolute bottom-1 right-1 pointer-events-none md:text-2xl text-white sm:text-black">
-      <coordinates v-model="coords" @update="handleCoordinatesUpdate"></coordinates>
     </div>
   </div>
 </template>
@@ -70,7 +70,7 @@ import { imgUrl, wsUrl } from './config.js';
 import { models } from './models.js';
 import StrokeBuffer from './strokeBuffer.js';
 import StrokeReplayer from './strokeReplayer.js';
-import { getBoundedCoords } from './utils.js';
+import { getBoundedCoords, setCrayonCursor, setHandCursor } from './utils.js';
 
 const router = useRouter();
 
@@ -206,5 +206,16 @@ onUnmounted(() => {
   clearInterval(interval);
   strokeBuffer.destroy();
   strokeReplayer.destroy();
+});
+
+onMounted(() => {
+  setHandCursor();
+});
+watchEffect(() => {
+  if (brush.value.kind === BrushKinds.Crayon) {
+    setCrayonCursor(brush.value.color);
+  } else {
+    setHandCursor();
+  }
 });
 </script>
