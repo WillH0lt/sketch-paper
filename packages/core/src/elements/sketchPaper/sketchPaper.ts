@@ -127,8 +127,6 @@ class SketchPaper extends SpBaseElement {
     this.container.appendChild(app.renderer.canvas);
     app.renderer.background.color = hexToNumber(this.settings.backgroundColor);
 
-    console.log(this.container, this.container.clientWidth, this.container.clientHeight);
-
     const viewport = new Viewport({
       events: app.renderer.events,
     });

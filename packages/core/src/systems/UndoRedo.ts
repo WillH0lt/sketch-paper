@@ -36,7 +36,6 @@ class UndoRedo extends BaseSystem {
 
   private readonly tileSources = this.query((q) => q.current.with(comps.TileSource));
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   private readonly _all = this.query((q) => q.usingAll.write);
 

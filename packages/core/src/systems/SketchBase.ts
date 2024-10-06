@@ -14,7 +14,6 @@ class SketchBase extends BaseSystem {
 
   private readonly _tiles = this.query((q) => q.current.with(comps.Tile).write);
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   private readonly _tileSources = this.query((q) => q.current.with(comps.TileSource).write);
 
