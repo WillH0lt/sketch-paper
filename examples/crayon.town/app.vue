@@ -74,15 +74,25 @@ import { getBoundedCoords, setCrayonCursor, setHandCursor } from './utils.js';
 
 const router = useRouter();
 
+const description =
+  'Welcome to CrayonTown, the infinite canvas for crayon drawings! Sketch awesome art with friends or strangers in real-time. Jump in and create your own crayon masterpiece!';
+useSeoMeta({
+  description,
+  ogDescription: description,
+  ogImage: '/og.png',
+  twitterCard: 'summary_large_image',
+});
+
 const sketchPaperRef = ref<InstanceType<typeof SketchPaper>>();
 const brush = ref({
   color: '#FF0000',
   kind: BrushKinds.None,
 });
 const peopleHere = ref(0);
+const spawnRadius = 4000;
 const coords = ref({
-  x: BigInt(0),
-  y: BigInt(0),
+  x: BigInt(spawnRadius - Math.floor(2 * spawnRadius * Math.random())),
+  y: BigInt(spawnRadius - Math.floor(2 * spawnRadius * Math.random())),
 });
 
 // offsets to give the illusion of an infinite canvas, sketch-paper goes up to 2^32 pixels
@@ -127,6 +137,7 @@ onMounted(async () => {
     baseUrl: imgUrl,
     allowUndo: false,
     maxTiles: 20,
+    loadingImg: '/loading.png',
     brushes: [BrushKinds.Crayon],
   });
 

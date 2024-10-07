@@ -5,13 +5,13 @@ export default defineNuxtConfig({
   site: {
     url: 'https://crayon.town',
     name: 'CrayonTown',
-    description:
-      'Welcome to CrayonTown, the infinite canvas for crayon drawings! Sketch awesome art with friends or strangers in real-time. Jump in and create your own crayon masterpiece!',
-    defaultLocale: 'en',
   },
   seo: {
     fallbackTitle: false,
   },
+  // app: {
+  //   cdnURL: './',
+  // },
   css: ['~/assets/style.css'],
   tailwindcss: {
     config: {
