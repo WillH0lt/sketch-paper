@@ -33,7 +33,6 @@
     "lit-analyze": "lit-analyzer src/**/* --strict",
     "prepare": "husky",
     "preversion": "npm run verify",
-    "publish": "cp ../../*.md .",
     "size": "size-limit",
     "test": "jest",
     "test:coverage": "jest --coverage",
