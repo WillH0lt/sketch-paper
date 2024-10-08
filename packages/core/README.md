@@ -20,8 +20,8 @@ import '@sketch-paper/core';
 ```
 
 ```html
-<!-- then add it to your html like this -->
-<sketch-paper></sketch-paper>
+<!-- add it to your html -->
+<sketch-paper ...></sketch-paper>
 ```
 
 ```js
