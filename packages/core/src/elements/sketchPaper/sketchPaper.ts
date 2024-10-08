@@ -32,6 +32,14 @@ function getBoundedCoords(x: number, y: number): [number, number] {
 @customElement('sketch-paper')
 class SketchPaper extends SpBaseElement {
   public static styles = css`
+    :host {
+      display: block;
+    }
+    #container {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
     canvas {
       display: block;
       vertical-align: middle;
@@ -122,6 +130,8 @@ class SketchPaper extends SpBaseElement {
       autoStart: false,
       preference: 'webgl',
     });
+    app.renderer.canvas.removeAttribute('width');
+    app.renderer.canvas.removeAttribute('height');
     app.renderer.canvas.style.width = '100%';
     app.renderer.canvas.style.height = '100%';
     this.container.appendChild(app.renderer.canvas);
@@ -263,7 +273,7 @@ class SketchPaper extends SpBaseElement {
 
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   protected render(): TemplateResult {
-    return html` <div id="container" style="width: 100%; height: 100%;"></div> `;
+    return html` <div id="container"></div> `;
   }
 
   private async loadBrush(kind: Exclude<BrushKinds, BrushKinds.None>): Promise<void> {
