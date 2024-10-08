@@ -62,9 +62,16 @@ Sketch paper works with all frameworks. Here's an example showing it with Vue.js
 </template>
 ```
 
+Check out [/examples](https://github.com/WillH0lt/sketch-paper/tree/main/examples) for more.
+
 ## Settings
 
-Settings are passed to the component via sketchPaperElement.initialize(settings). All settings are optional.
+```js
+// Settings are passed to the component via
+sketchPaperElement.initialize(settings);
+```
+
+All settings are optional.
 
 | field                  | Default             | Description                                                                                                                                                                                                                                      |
 | ---------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -90,7 +97,13 @@ Settings are passed to the component via sketchPaperElement.initialize(settings)
 
 ## Attributes
 
-The `<sketch-paper>` component uses the following attributes. Unlike the settings, these can be updated during runtime.
+Add attributes directly to the HTML directive.
+
+```html
+<sketch-paper ... brush-color="#ff0000" brush-size="50"></sketch-paper>
+```
+
+`<sketch-paper>` uses the following attributes. Unlike the settings, these can be updated during runtime.
 | Attribute | Default | Description |
 | -------- | ------- | ------- |
 | brush-color | #000000 | Hex string, it can also include opacity value, eg: #00000000
@@ -103,7 +116,7 @@ The `<sketch-paper>` component uses the following attributes. Unlike the setting
 
 ## Events
 
-The `<sketch-paper>` component emits the following events:
+Stay informed by listening for events.
 
 ```html
 <sketch-paper ... @sp-move="handleMove" />
@@ -114,6 +127,8 @@ function handleMove(event: SpMoveEvent) {
     console.log(event.detail) // { x: 123; y: 456 }
 }
 ```
+
+The `<sketch-paper>` component emits the following events:
 
 | Event        | Payload                  | Description                                                                                                          |
 | ------------ | ------------------------ | -------------------------------------------------------------------------------------------------------------------- |
