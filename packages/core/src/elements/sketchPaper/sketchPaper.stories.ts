@@ -26,6 +26,8 @@ export default {
 
     sketchPaper
       .initialize({
+        baseUrl: 'https://storage.googleapis.com/crayontown',
+        loadingImg: '/loading.png',
         brushes: [BrushKinds.Crayon],
       })
       .catch((err: unknown) => {

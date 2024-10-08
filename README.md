@@ -5,37 +5,32 @@ Sketch Paper is a library for creating drawing applications. It's the software b
 ## Usage
 
 ```html
-<template>
-  <sketch-paper
-    id="sketch-paper"
-    width="100vw"
-    height="100vh"
-    brush-color="#FF0000"
-    brush-size="15"
-    :brush-kind="BrushKinds.Marker"
-  ></sketch-paper>
-</template>
-
-<script setup>
-  import { onMounted } from 'vue';
+<script setup lang="ts">
+  import { ref, onMounted } from 'vue';
 
   import { BrushKinds } from '@sketch-paper/core';
 
+  const sketchPaperRef = ref();
   onMounted(() => {
-    const sketchPaper = document.getElementById('sketch-paper');
-
-    sketchPaper.initialize({
-      minZoom: 1,
-      maxZoom: 10,
-      startX: 0,
-      startY: 0,
+    sketchPaperRef.value?.initialize({
       tileCountX: 0, // 0 means infinite
       tileCountY: 0, // 0 means infinite
-      allowUndo: true,
-      brushes: [BrushKinds.Crayon, BrushKinds.Marker, BrushKinds.Paint],
+      brushes: [BrushKinds.Crayon],
     });
   });
 </script>
+
+<template>
+  <div style="width: 100vw; height: 100vh">
+    <sketch-paper
+      ref="sketchPaperRef"
+      brush-color="#000000"
+      :brush-kind="BrushKinds.Crayon"
+      brush-size="20"
+    >
+    </sketch-paper>
+  </div>
+</template>
 ```
 
 Check out the demo at [sketchpaper.ink](https://sketchpaper.ink).

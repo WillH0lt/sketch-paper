@@ -1,6 +1,19 @@
-export { default as BaseBrush } from './BaseBrush.js';
-export { default as CrayonBrush } from './crayon/CrayonBrush.js';
-export { default as MarkerBrush } from './marker/MarkerBrush.js';
-export { default as PaintBrush } from './paint/PaintBrush.js';
+import type * as PIXI from 'pixi.js';
+import { BrushKinds } from './types.js';
+
+import BaseBrush from './BaseBrush.js';
+import CrayonBrush from './crayon/CrayonBrush.js';
+import MarkerBrush from './marker/MarkerBrush.js';
+import PaintBrush from './paint/PaintBrush.js';
+
+export { BaseBrush, CrayonBrush, MarkerBrush, PaintBrush };
+export const Brushes: Record<
+  Exclude<BrushKinds, BrushKinds.None>,
+  new (app: PIXI.Application) => BaseBrush
+> = Object.freeze({
+  [BrushKinds.Crayon]: CrayonBrush,
+  [BrushKinds.Marker]: MarkerBrush,
+  [BrushKinds.Paint]: PaintBrush,
+});
 
 export * from './types.js';

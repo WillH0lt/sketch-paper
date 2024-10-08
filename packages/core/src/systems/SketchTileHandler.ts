@@ -114,6 +114,19 @@ class SketchTileHandler extends SketchBase {
       });
 
       this.viewport.addChild(tileSprite);
+
+      if (this.settings.loadingImg !== '') {
+        const loadingSprite = new PIXI.TilingSprite();
+        loadingSprite.texture = PIXI.Texture.from(this.settings.loadingImg);
+        loadingSprite.width = this.settings.tileWidth;
+        loadingSprite.height = this.settings.tileHeight;
+
+        this.app.renderer.render({
+          container: loadingSprite,
+          target: tileSprite.texture,
+          clear: false,
+        });
+      }
     }
 
     // update tile sprite images

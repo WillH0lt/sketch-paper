@@ -54,8 +54,8 @@ async function setupSketchCanvas(element: HTMLElement): Promise<void> {
   // setup drawing surface
 
   const texture = PIXI.RenderTexture.create({
-    width: 2048,
-    height: 2048,
+    width: 1260,
+    height: 1000,
   });
 
   const white = new PIXI.Sprite(PIXI.Texture.WHITE);

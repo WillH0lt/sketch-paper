@@ -7,8 +7,7 @@
     "deploy": "nuxt generate && pnpm dlx firebase-tools deploy",
     "dev": "nuxt dev --host",
     "generate": "protoc -I ./backend/shared/models/ --ts_out . models.proto",
-    "postinstall": "nuxt prepare",
-    "preview": "nuxt preview"
+    "postinstall": "nuxt prepare"
   },
   "dependencies": {
     "@jaames/iro": "^5.5.2",

@@ -89,7 +89,7 @@ const brush = ref({
   kind: BrushKinds.None,
 });
 const peopleHere = ref(0);
-const spawnRadius = 4000;
+const spawnRadius = 8000;
 const coords = ref({
   x: BigInt(spawnRadius - Math.floor(2 * spawnRadius * Math.random())),
   y: BigInt(spawnRadius - Math.floor(2 * spawnRadius * Math.random())),
@@ -138,6 +138,7 @@ onMounted(async () => {
     allowUndo: false,
     maxTiles: 20,
     loadingImg: '/loading.png',
+    maxSegmentLength: 300,
     brushes: [BrushKinds.Crayon],
   });
 

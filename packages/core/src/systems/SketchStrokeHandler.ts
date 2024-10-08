@@ -101,7 +101,8 @@ class SketchStrokeHandler extends SketchBase {
         .filter((tile, index, self) => index === self.findIndex((t) => t === tile));
 
       const segmentLength = Math.sqrt((end[0] - start[0]) ** 2 + (end[1] - start[1]) ** 2);
-      if (segmentLength > 300) continue;
+      if (this.settings.maxSegmentLength !== 0 && segmentLength > this.settings.maxSegmentLength)
+        continue;
 
       const segments = [];
 

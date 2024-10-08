@@ -48,6 +48,8 @@ export interface Settings {
   allowUndo: boolean;
   tileLoadingConcurrency: number;
   maxTiles: number;
+  loadingImg: string;
+  maxSegmentLength: number;
   brushes: Exclude<BrushKinds, BrushKinds.None>[];
 }
 
@@ -66,6 +68,8 @@ export const defaultSettings: Settings = {
   allowUndo: true,
   tileLoadingConcurrency: 3,
   maxTiles: 20,
+  loadingImg: '',
+  maxSegmentLength: 0,
   brushes: [BrushKinds.Crayon],
 };
 

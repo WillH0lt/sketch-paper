@@ -57,8 +57,6 @@ class InputReader extends BaseSystem {
 
       if (e.pointerType === 'mouse' && !mouseButtons.includes(e.button)) return;
 
-      // TODO detect pen eraser (e.pointerType === 'pen' && e.buttons === 32)
-
       this.pointerIds.add(e.pointerId);
 
       if (this.pointerIds.size > 1) {

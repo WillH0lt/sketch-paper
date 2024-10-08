@@ -24,7 +24,11 @@ class Settings {
 
   @field.uint8 public declare tileLoadingConcurrency: number;
 
+  @field.dynamicString(512) public declare loadingImg: string;
+
   @field.uint8 public declare maxTiles: number;
+
+  @field.uint32 public declare maxSegmentLength: number;
 }
 
 export default Settings;

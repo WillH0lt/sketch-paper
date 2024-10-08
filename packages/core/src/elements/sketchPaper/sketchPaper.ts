@@ -8,7 +8,7 @@ import * as PIXI from 'pixi.js';
 import { Emitter } from 'strict-event-emitter';
 
 import type { BaseBrush } from '@sketch-paper/brushes';
-import { CrayonBrush } from '@sketch-paper/brushes';
+import { Brushes } from '@sketch-paper/brushes';
 import * as comps from '../../components/index.js';
 import { hexToNumber, hexToRgba } from '../../systems/common.js';
 import * as sys from '../../systems/index.js';
@@ -137,13 +137,14 @@ class SketchPaper extends SpBaseElement {
     app.stage.addChild(viewport);
 
     // =================================
-    // brushes
+    // load assets
 
-    await Promise.all(this.settings.brushes.map(async (kind) => this.loadBrush(kind))).catch(
-      (err: unknown) => {
-        console.error(err);
-      },
-    );
+    const promises = this.settings.brushes.map(async (kind) => this.loadBrush(kind));
+    if (this.settings.loadingImg) {
+      promises.push(PIXI.Assets.load(this.settings.loadingImg));
+    }
+
+    await Promise.all(promises);
 
     // =================================
     // events
@@ -265,7 +266,7 @@ class SketchPaper extends SpBaseElement {
     return html` <div id="container" style="width: 100%; height: 100%;"></div> `;
   }
 
-  private async loadBrush(kind: BrushKinds): Promise<void> {
+  private async loadBrush(kind: Exclude<BrushKinds, BrushKinds.None>): Promise<void> {
     if (!this.app) {
       throw new Error('App not initialized');
     }
@@ -274,8 +275,10 @@ class SketchPaper extends SpBaseElement {
       throw new Error(`Brush of kind ${kind} already loaded`);
     }
 
-    if (kind === BrushKinds.Crayon) {
-      const brush = new CrayonBrush(this.app);
+    if (kind in Brushes) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      const Brush = Brushes[kind] as new (app: PIXI.Application) => BaseBrush;
+      const brush = new Brush(this.app);
       await brush.init();
       this.brushInstances.set(kind, brush);
     } else {
