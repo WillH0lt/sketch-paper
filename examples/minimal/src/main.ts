@@ -5,6 +5,7 @@ async function run(): Promise<void> {
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   document.querySelector('#app')!.innerHTML = `
     <sketch-paper
+      style="width: 100vw; height: 100vh;"
       brush-color="#ffffff"
       brush-kind="${BrushKinds.Crayon}"
       brush-size="30"
