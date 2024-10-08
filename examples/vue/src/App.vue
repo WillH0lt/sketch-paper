@@ -40,13 +40,12 @@ onMounted(() => {
 </script>
 
 <template>
-  <div style="width: 100vw; height: 100vh">
-    <sketch-paper
-      ref="sketchPaperRef"
-      :brush-color="brush.color"
-      :brush-kind="brush.kind"
-      :brush-size="brush.size"
-    >
-    </sketch-paper>
-  </div>
+  <sketch-paper
+    ref="sketchPaperRef"
+    style="width: 100vw; height: 100vh"
+    :brush-color="brush.color"
+    :brush-kind="brush.kind"
+    :brush-size="brush.size"
+  >
+  </sketch-paper>
 </template>
