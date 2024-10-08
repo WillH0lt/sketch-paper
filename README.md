@@ -40,12 +40,18 @@ Sketch paper works with all frameworks. Here's an example showing it with Vue.js
 
   import { BrushKinds } from '@sketch-paper/core';
 
+  const brush = ref({
+    size: 10,
+    color: '#000000',
+    kind: BrushKinds.Marker,
+  });
+
   const sketchPaperRef = ref();
   onMounted(() => {
     sketchPaperRef.value?.initialize({
       tileCountX: 0, // 0 means infinite
       tileCountY: 0, // 0 means infinite
-      brushes: [BrushKinds.Crayon],
+      brushes: [BrushKinds.Marker],
     });
   });
 </script>
