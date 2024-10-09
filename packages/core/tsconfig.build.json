@@ -3,7 +3,7 @@
   "compilerOptions": {
     "allowJs": false,
     "noEmit": false,
-    "outDir": "artifacts"
+    "outDir": "dist"
   },
   "exclude": [
     "**/__mocks__/**",

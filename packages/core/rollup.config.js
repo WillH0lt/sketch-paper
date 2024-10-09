@@ -1,44 +1,48 @@
-/* eslint-disable @typescript-eslint/explicit-function-return-type, @typescript-eslint/explicit-module-boundary-types, @typescript-eslint/typedef, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
+import alias from '@rollup/plugin-alias'; // Alias plugin
 import commonjs from '@rollup/plugin-commonjs';
-import nodeResolve from '@rollup/plugin-node-resolve';
+import resolve from '@rollup/plugin-node-resolve';
 import replace from '@rollup/plugin-replace';
-import dts from 'rollup-plugin-dts';
+import typescript from '@rollup/plugin-typescript';
 import glslify from 'rollup-plugin-glslify';
 
 const isServe = Boolean(process.env.SERVE);
 
 const config = [
   {
-    input: 'artifacts/sketch-paper.js',
+    input: 'src/sketch-paper.ts',
     output: {
       name: 'SketchPaper',
       dir: 'dist',
       entryFileNames: '[name].min.js',
-      format: 'es',
+      format: 'esm',
       sourcemap: true,
     },
-    external: isServe ? [] : [/lit/],
-    onwarn(warning, warn) {
-      if (warning.code === 'THIS_IS_UNDEFINED') {
-        return;
-      }
-      warn(warning);
-    },
+    external: isServe ? [] : [/lit/, 'pixi.js'],
+    // onwarn(warning, warn) {
+    //   if (warning.code === 'THIS_IS_UNDEFINED') {
+    //     return;
+    //   }
+    //   warn(warning);
+    // },
     plugins: [
+      alias({
+        entries: [
+          { find: 'pixi.js', replacement: 'pixi.js/dist/pixi.mjs' }, // Ensuring the correct pixi.js path
+        ],
+      }),
       replace({
         '@lastolivegames/becsy': '@lastolivegames/becsy/perf',
         preventAssignment: true,
       }),
       glslify(),
-      nodeResolve(),
+      resolve({
+        exportConditions: ['module', 'import'],
+        moduleDirectories: ['node_modules'],
+      }),
       commonjs(),
+      typescript({ tsconfig: './tsconfig.build.json' }),
       // terser(),
     ],
-  },
-  {
-    input: './artifacts/sketch-paper.d.ts',
-    output: [{ file: 'dist/sketch-paper.d.ts', format: 'esm' }],
-    plugins: [dts()],
   },
 ];
 
