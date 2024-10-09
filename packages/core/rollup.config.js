@@ -1,4 +1,7 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type, @typescript-eslint/explicit-module-boundary-types, @typescript-eslint/typedef, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
+import commonjs from '@rollup/plugin-commonjs';
+import nodeResolve from '@rollup/plugin-node-resolve';
+import replace from '@rollup/plugin-replace';
 import dts from 'rollup-plugin-dts';
 import glslify from 'rollup-plugin-glslify';
 
@@ -8,9 +11,10 @@ const config = [
   {
     input: 'artifacts/sketch-paper.js',
     output: {
+      name: 'SketchPaper',
       dir: 'dist',
       entryFileNames: '[name].min.js',
-      format: 'esm',
+      format: 'es',
       sourcemap: true,
     },
     external: isServe ? [] : [/lit/],
@@ -21,16 +25,14 @@ const config = [
       warn(warning);
     },
     plugins: [
-      // replace({
-      //   '@lastolivegames/becsy': '@lastolivegames/becsy/perf',
-      //   preventAssignment: true,
-      // }),
+      replace({
+        '@lastolivegames/becsy': '@lastolivegames/becsy/perf',
+        preventAssignment: true,
+      }),
       glslify(),
-      // terser({
-      //   compress: {
-      //     drop_console: true,
-      //   },
-      // }),
+      nodeResolve(),
+      commonjs(),
+      // terser(),
     ],
   },
   {
