@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type, @typescript-eslint/explicit-module-boundary-types, @typescript-eslint/typedef, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
-import replace from '@rollup/plugin-replace';
 import terser from '@rollup/plugin-terser';
 import dts from 'rollup-plugin-dts';
 import glslify from 'rollup-plugin-glslify';
@@ -23,10 +22,10 @@ const config = [
       warn(warning);
     },
     plugins: [
-      replace({
-        '@lastolivegames/becsy': '@lastolivegames/becsy/perf',
-        preventAssignment: true,
-      }),
+      // replace({
+      //   '@lastolivegames/becsy': '@lastolivegames/becsy/perf',
+      //   preventAssignment: true,
+      // }),
       glslify(),
       terser({
         compress: {
