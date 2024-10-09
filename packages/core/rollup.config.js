@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type, @typescript-eslint/explicit-module-boundary-types, @typescript-eslint/typedef, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
-import terser from '@rollup/plugin-terser';
 import dts from 'rollup-plugin-dts';
 import glslify from 'rollup-plugin-glslify';
 
@@ -27,11 +26,11 @@ const config = [
       //   preventAssignment: true,
       // }),
       glslify(),
-      terser({
-        compress: {
-          drop_console: true,
-        },
-      }),
+      // terser({
+      //   compress: {
+      //     drop_console: true,
+      //   },
+      // }),
     ],
   },
   {

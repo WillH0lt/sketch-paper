@@ -1,6 +1,6 @@
 {
   "name": "@sketch-paper/core",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "type": "module",
   "description": "A web component for creating drawing applications",
   "repository": "WillH0lt/sketch-paper",
