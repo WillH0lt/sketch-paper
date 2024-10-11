@@ -50,5 +50,6 @@ export function getTileImageUrl(baseUrl: string, tileX: number, tileY: number): 
   if (baseUrl === '') {
     return '';
   }
-  return `${baseUrl}/${tileX}_${tileY}.png`;
+  const cacheBuster = Math.floor(1_000_000_000_000 * Math.random());
+  return `${baseUrl}/${tileX}_${tileY}.png?c=${cacheBuster}`;
 }
