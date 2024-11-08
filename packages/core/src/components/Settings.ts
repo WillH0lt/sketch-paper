@@ -18,6 +18,8 @@ class Settings {
 
   @field.dynamicString(7) public declare baseColor: string;
 
+  @field.boolean public declare isTransparent: boolean;
+
   @field.dynamicString(7) public declare backgroundColor: string;
 
   @field.boolean public declare allowUndo: boolean;

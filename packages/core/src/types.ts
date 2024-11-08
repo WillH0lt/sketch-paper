@@ -44,6 +44,7 @@ export interface Settings {
   tileHeight: number;
   baseUrl: string;
   baseColor: string;
+  isTransparent: boolean;
   backgroundColor: string;
   allowUndo: boolean;
   tileLoadingConcurrency: number;
@@ -64,6 +65,7 @@ export const defaultSettings: Settings = {
   tileHeight: 2048,
   baseUrl: '',
   baseColor: '#C2BCB0',
+  isTransparent: false,
   backgroundColor: '#FFFFFF',
   allowUndo: true,
   tileLoadingConcurrency: 3,

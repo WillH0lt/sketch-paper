@@ -98,6 +98,7 @@ All settings are optional.
 | maxTiles               | 20                  | How many tiles can be loaded in memory at once.                                                                                                                                                                                                  |
 | loadingImg             | ''                  | A URL pointing to an image to show while a tile is loading. The loading image doesn't have to be the same resolution as the tile.                                                                                                                |
 | maxSegmentLength       | 0                   | How long a segment is a allowed to be. 0 means infinte.                                                                                                                                                                                          |
+| isTransparent          | false               | Make the canvas itself transparent and only show brush strokes. Useful if you want to show html behind the sketch-paper element.                                                                                                                 |
 
 \* Infinite actually means 2^32 pixels, the canvas will loop after that.
 

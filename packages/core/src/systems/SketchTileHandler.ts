@@ -61,6 +61,7 @@ class SketchTileHandler extends SketchBase {
     if (sprite.texture.label === 'EMPTY') {
       sprite.texture = PIXI.Texture.WHITE;
       sprite.tint = hexToNumber(this.settings.baseColor);
+      sprite.alpha = this.settings.isTransparent ? 0 : 1;
       sprite.width = this.settings.tileWidth;
       sprite.height = this.settings.tileHeight;
     }
@@ -104,6 +105,7 @@ class SketchTileHandler extends SketchBase {
       const sprite = new PIXI.Sprite(PIXI.Texture.WHITE);
       const tint = hexToNumber(this.settings.baseColor);
       sprite.tint = tint;
+      sprite.alpha = this.settings.isTransparent ? 0 : 1;
       sprite.width = this.settings.tileWidth;
       sprite.height = this.settings.tileHeight;
 

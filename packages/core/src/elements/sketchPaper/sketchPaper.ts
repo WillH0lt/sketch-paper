@@ -129,13 +129,16 @@ class SketchPaper extends SpBaseElement {
     await app.init({
       autoStart: false,
       preference: 'webgl',
+      backgroundAlpha: this.settings.isTransparent ? 0 : 1,
     });
     app.renderer.canvas.removeAttribute('width');
     app.renderer.canvas.removeAttribute('height');
     app.renderer.canvas.style.width = '100%';
     app.renderer.canvas.style.height = '100%';
     this.container.appendChild(app.renderer.canvas);
-    app.renderer.background.color = hexToNumber(this.settings.backgroundColor);
+    if (!this.settings.isTransparent) {
+      app.renderer.background.color = hexToNumber(this.settings.backgroundColor);
+    }
 
     const viewport = new Viewport({
       events: app.renderer.events,
